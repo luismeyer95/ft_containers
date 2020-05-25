@@ -1,0 +1,112 @@
+* creating set of size 0 *
+size = 0
+{  }
+
+Map empty() = true
+
+Map max_size() = 461168601842738790
+* inserted {3, 7, 2, 4, 4, 5} consecutively *
+size = 6
+{ (2), (3), (4), (4), (5), (7) }
+
+* checking return values / changes when inserting * :
+-> success
+-> success
+size = 9
+{ (2), (3), (4), (4), (4), (5), (7), (8), (9) }
+
+* checking range-inserting * :
+size = 14
+{ (2), (2), (3), (4), (4), (4), (5), (7), (8), (9), (19), (23), (34), (76) }
+
+Map size() = 14
+Map empty() = false
+
+* iterators: begin() to end() *
+{ (2), (2), (3), (4), (4), (4), (5), (7), (8), (9), (19), (23), (34), (76) }
+* const iterators: begin() to end() *
+{ (2), (2), (3), (4), (4), (4), (5), (7), (8), (9), (19), (23), (34), (76) }
+* iterators: rbegin() to rend() *
+{ (76), (34), (23), (19), (9), (8), (7), (5), (4), (4), (4), (3), (2), (2) }
+
+ * erase() *
+-> key parameter: erasing 5 and 19
+size = 12
+{ (2), (2), (3), (4), (4), (4), (7), (8), (9), (23), (34), (76) }
+
+-> iterator parameter: erasing 1st 4
+size = 11
+{ (2), (2), (3), (4), (4), (7), (8), (9), (23), (34), (76) }
+
+-> iterator range: erasing [2nd 4, 34[
+size = 6
+{ (2), (2), (3), (4), (34), (76) }
+
+* constructors/assignment op *
+-> construct from iterators [first + 1, last - 1]
+size = 4
+{ (2), (3), (4), (34) }
+
+-> copy construction
+size = 4
+{ (2), (3), (4), (34) }
+
+-> assignment (operator=)
+size = 6
+{ (2), (2), (3), (4), (34), (76) }
+
+* swap() *
+-> printing set then set_bis
+size = 6
+{ (2), (2), (3), (4), (34), (76) }
+
+size = 3
+{ (3), (4), (34) }
+
+-> printing set then set_bis
+size = 3
+{ (3), (4), (34) }
+
+size = 6
+{ (2), (2), (3), (4), (34), (76) }
+
+* clear() *
+-> before clear()
+size = 3
+{ (3), (4), (34) }
+
+-> after clear()
+size = 0
+{  }
+
+* key_comp() *
+-> fail
+* value_comp() *
+-> fail
+size = 6
+{ (2), (2), (3), (4), (34), (76) }
+
+* find(), count() *
+-> 3 found, count = 1
+* lower_bound(), upper_bound() *
+size = 9
+{ (2), (2), (3), (4), (7), (9), (17), (34), (76) }
+
+-> lower_bound(7) = 7
+-> upper_bound(32) = 34
+-> equal_range(2) = 
+size = 2
+{ (2), (2) }
+
+-> equal_range(76) = 
+size = 1
+{ (76) }
+
+* const set member access *
+--> success
+* iterators and constness *
+-> success
+-> success
+-> success
+-> success
+
