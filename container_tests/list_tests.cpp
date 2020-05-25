@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 14:49:05 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 14:36:11 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/25 16:28:29 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -290,4 +290,5 @@ int main()
 	comp_ops<ft::list<std::string> >();
 
 	std::cout.rdbuf(coutbuf);
+
 }

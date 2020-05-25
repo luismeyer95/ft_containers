@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 16:16:15 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 14:28:36 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/25 16:40:37 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,22 +32,12 @@ namespace ft {
 			
 		protected:
 
-			struct Node
-        	{
-        	    Node* next;
-        	    Node* prev;
-        	    T data;
-        	};
-
-			struct Sentry
-        	{
-        	    Node* next;
-        	    Node* prev;
-        	};
+			typedef ft::lst_node<T> Node;
+			typedef ft::lst_sentry<T> Sentry;
   
-			size_t	_size;
-			Node*	sentry;
-			Alloc	_alloc;
+			size_t			_size;
+			Node*			sentry;
+			Alloc			_alloc;
 
 			void 			link(Node* n1, Node* n2);
 			Node* 			unlink(Node* e);
@@ -60,23 +50,55 @@ namespace ft {
 			typedef typename Alloc::template rebind<Node>::other node_alloc;
 			typedef typename Alloc::template rebind<Sentry>::other sentry_alloc;
 			
-			template <bool is_const>
-			class lst_iterator;
-			
-			template <bool is_const>
-			class lst_reverse_iterator : public reverse_iterator< lst_iterator<is_const> >
+			template <typename U, bool is_const>
+			class lst_iterator : public base_lst_iterator<U, is_const>
 			{
-				private:
-					typedef ft::reverse_iterator< lst_iterator<is_const> > reverse_iterator;
+				protected:
+					using base_lst_iterator<U, is_const>::ptr;
+					using base_lst_iterator<U, is_const>::get;
+				public:
+					typedef U value_type;
+					typedef typename choose<is_const, const U&, U&>::type reference;
+					typedef typename choose<is_const, const U*, U*>::type pointer;
+					typedef std::ptrdiff_t difference_type;
+					typedef std::random_access_iterator_tag iterator_category;
+					typedef typename remove_const<U>::type non_const_type;
+					typedef lst_iterator<non_const_type, false> non_const_iterator;
+					
+					lst_iterator() : base_lst_iterator<U, is_const>() {}
+					lst_iterator(const base_lst_iterator<non_const_type, false>& it) : base_lst_iterator<U, is_const>(it.ptr) {}
+					lst_iterator(const lst_iterator<non_const_type, false>& target) : base_lst_iterator<U, is_const>(target) {}
+					using base_lst_iterator<U, is_const>::operator=;
+					~lst_iterator() {}
+			};
+			
+			template <typename I>
+			class lst_reverse_iterator : public base_reverse_iterator<I>
+			{
+				protected:
+					using base_reverse_iterator<I>::itbase;
+					typedef typename base_reverse_iterator<I>::non_const_iterator non_const_iterator;
 				public:
 					lst_reverse_iterator()
-						: reverse_iterator() {}
-					explicit lst_reverse_iterator(const lst_iterator<is_const>& it)
-						: reverse_iterator(it) {}
-					lst_reverse_iterator(const ft::reverse_iterator< lst_iterator<false> >& rev_it)
-						: reverse_iterator(rev_it) {}
+						: base_reverse_iterator<I>() {}
+					lst_reverse_iterator(const lst_reverse_iterator<non_const_iterator>& it)
+						: base_reverse_iterator<I>(it) {}
+					lst_reverse_iterator(const base_reverse_iterator<I>& rev_it)
+						: base_reverse_iterator<I>(rev_it.itbase) {}
+					using base_reverse_iterator<I>::operator=;
 					~lst_reverse_iterator() {}
 			};
+
+			template <typename U, bool is_const>
+			inline const base_lst_iterator<U, is_const>& bcast(const lst_iterator<U, is_const>& it) const
+			{
+				return *(base_lst_iterator<U, is_const>*)&it;
+			}
+			// template <typename U, bool is_const>
+			// inline const base_lst_iterator<U, is_const>& bcast(const base_lst_iterator<U, is_const>& it) const
+			// {
+			// 	return *(base_lst_iterator<U, is_const>*)&it;
+			// }
 			
 		public:
 
@@ -88,10 +110,10 @@ namespace ft {
 			list<T, Alloc>& 		operator=(const list<T, Alloc>& target);
 			~list();
 
-			typedef lst_iterator<false> iterator;
-			typedef lst_iterator<true> const_iterator;
-			typedef lst_reverse_iterator<false> reverse_iterator;
-			typedef lst_reverse_iterator<true> const_reverse_iterator;
+			typedef lst_iterator<T, false> iterator;
+			typedef lst_iterator<const T, true> const_iterator;
+			typedef lst_reverse_iterator<iterator> reverse_iterator;
+			typedef lst_reverse_iterator<const_iterator> const_reverse_iterator;
 			
 			size_t					size() const;
 			void					resize (size_type n, value_type val = value_type());
@@ -162,60 +184,8 @@ namespace ft {
 			friend bool operator>=(const list<U, V>&, const list<U, V>&);
 	};
 
-	template<typename T, class Alloc>
-	template <bool is_const>
-	class list<T, Alloc>::lst_iterator
-	{
-		friend class list<T, Alloc>;
-		protected:
-			typedef typename choose<is_const, const Node*, Node*>::type node_pointer;
-			node_pointer		ptr;
-			node_pointer&		get() { return (ptr); }
-		public:
-			typedef T value_type;
-			typedef typename choose<is_const, const T&, T&>::type reference;
-			typedef typename choose<is_const, const T*, T*>::type pointer;
-			typedef std::ptrdiff_t difference_type;
-			typedef std::bidirectional_iterator_tag iterator_category;
-			typedef lst_iterator<false> non_const_iterator;
-
-			lst_iterator() : ptr(nullptr) {}
-			lst_iterator(node_pointer p) : ptr(p) {}
-			lst_iterator(const lst_iterator<false>& target) : ptr(target.ptr) {}
-			lst_iterator&	operator=(const lst_iterator<false>& target) { ptr = target.ptr; return *this; }
-
-			~lst_iterator() {}
-			reference		operator*() { if (ptr) return ptr->data; throw std::out_of_range(std::string("Error: dereferencing null pointer")); }
-			lst_iterator	operator+(size_t n) { lst_iterator tmp(ptr); while (n--) tmp++; return (tmp); }
-			lst_iterator	operator-(size_t n) { lst_iterator tmp(ptr); while (n--) tmp--; return (tmp); }
-			lst_iterator&	operator++()
-			{
-				if (ptr)
-					ptr = ptr->next;
-				return (*this);
-			}
-			lst_iterator	operator++(int) { lst_iterator tmp(ptr); operator++(); return (tmp); }
-			lst_iterator&	operator--()
-			{
-				if (ptr)
-					ptr = ptr->prev;
-				return (*this);
-			}
-			lst_iterator	operator--(int) { lst_iterator tmp(ptr); operator--(); return (tmp); }
-			
-			template <bool A, bool B>
-			friend bool		operator==(	const lst_iterator<A>& a,
-										const lst_iterator<B>& b)
-			{ return (a.ptr == b.ptr); }
-
-			template <bool A, bool B>
-			friend bool		operator!=(	const lst_iterator<A>& a,
-										const lst_iterator<B>& b)
-			{ return (a.ptr != b.ptr); }
-			
-			bool			operator==(node_pointer b) { return (ptr == b); }
-			bool			operator!=(node_pointer b) { return (ptr != b); }
-	};
+	
+	
 
 	template<typename T, class Alloc>
 	void 			list<T, Alloc>::link(Node* n1, Node* n2) { n1->next = n2; n2->prev = n1; }
@@ -407,9 +377,9 @@ namespace ft {
 	typename list<T, Alloc>::iterator					list<T, Alloc>::begin() { return (iterator(sentry->next)); }
 
 	template<typename T, class Alloc>
-	typename list<T, Alloc>::const_reverse_iterator		list<T, Alloc>::rbegin() const { return (const_reverse_iterator(sentry)); }
+	typename list<T, Alloc>::const_reverse_iterator		list<T, Alloc>::rbegin() const { return (const_reverse_iterator(end())); }
 	template<typename T, class Alloc>
-	typename list<T, Alloc>::reverse_iterator			list<T, Alloc>::rbegin() { return (reverse_iterator(sentry)); }
+	typename list<T, Alloc>::reverse_iterator			list<T, Alloc>::rbegin() { return (reverse_iterator(end())); }
 
 	template<typename T, class Alloc>
 	typename list<T, Alloc>::const_iterator				list<T, Alloc>::end() const { return (const_iterator(sentry)); }
@@ -417,9 +387,9 @@ namespace ft {
 	typename list<T, Alloc>::iterator					list<T, Alloc>::end() { return (iterator(sentry)); }
 
 	template<typename T, class Alloc>
-	typename list<T, Alloc>::const_reverse_iterator		list<T, Alloc>::rend() const { return (const_reverse_iterator(sentry->next)); }
+	typename list<T, Alloc>::const_reverse_iterator		list<T, Alloc>::rend() const { return (const_reverse_iterator(begin())); }
 	template<typename T, class Alloc>
-	typename list<T, Alloc>::reverse_iterator			list<T, Alloc>::rend() { return (reverse_iterator(sentry->next)); }
+	typename list<T, Alloc>::reverse_iterator			list<T, Alloc>::rend() { return (reverse_iterator(begin())); }
 
 	// /* FRONT */
 	template<typename T, class Alloc>
@@ -475,7 +445,7 @@ namespace ft {
 	template<typename T, class Alloc>
 	typename list<T, Alloc>::iterator	list<T, Alloc>::insert(iterator position, const value_type& val)
 	{
-		Node* it = position.get();
+		Node* it = bcast(position).ptr;
 		insert_node(create_node(val), it->prev, it);
 		_size++;
 		return (position);
@@ -501,7 +471,7 @@ namespace ft {
 	typename list<T, Alloc>::iterator	list<T, Alloc>::erase(iterator position)
 	{
 		iterator next(position + 1);
-		delete_node(position.get());
+		delete_node(bcast(position).ptr);
 		_size--;
 		return (next);
 	}
@@ -514,7 +484,7 @@ namespace ft {
 		while (it != last)
 		{
 			next = ft::fwd(it, 1);
-			delete_node(it.get());
+			delete_node(bcast(it).ptr);
 			it = next;
 			_size--;
 		}
@@ -549,7 +519,7 @@ namespace ft {
 	template<typename T, class Alloc>
 	void 					list<T, Alloc>::splice(iterator position, list<T, Alloc>& x, iterator i)
 	{
-		insert_node(unlink(i.get()), (position - 1).get(), position.get());
+		insert_node(unlink(bcast(i).ptr), bcast(ft::fwd(position, -1)).ptr, bcast(position).ptr);
 		_size++;
 		x._size--;
 	}
@@ -562,9 +532,9 @@ namespace ft {
 		typename list<T, Alloc>::iterator it = first;
 		while (it != last)
 		{
-			pit = it.get();
+			pit = bcast(it).ptr;
 			next = it + 1;
-			insert_node(unlink(pit), (position - 1).get(), position.get());
+			insert_node(unlink(pit), bcast(ft::fwd(position, -1)).ptr, bcast(position).ptr);
 			_size++;
 			x._size--;
 			it = next;
@@ -651,7 +621,7 @@ namespace ft {
 		{
 			if (*it < *(it - 1))
 			{
-				swap_nodes(it.get()->prev, it.get());
+				swap_nodes(bcast(it).ptr->prev, bcast(it).ptr);
 				if (it == begin())
 					it++;
 			}
@@ -669,7 +639,7 @@ namespace ft {
 		{
 			if (comp(*it, *(it - 1)))
 			{
-				swap_nodes(it.get()->prev, it.get());
+				swap_nodes(bcast(it).ptr->prev, bcast(it).ptr);
 				if (it == begin())
 					it++;
 			}
@@ -730,7 +700,9 @@ namespace ft {
 	template <typename U, typename V>
 	bool operator<(const list<U, V>& lhs, const list<U, V>& rhs)
 	{
-		return std::lexicographical_compare<typename list<U, V>::const_iterator, typename list<U, V>::const_iterator>
+		return std::lexicographical_compare<
+			base_lst_iterator<const U, true>,
+			base_lst_iterator<const U, true> >
 		(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
@@ -761,7 +733,6 @@ namespace ft {
 			stream << *it;
 			if (ft::fwd(it, 1) != target.end())
 				std::cout << ", ";
-				
 		}
 		stream << "}";
 		return (stream);

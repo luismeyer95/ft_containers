@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/11 13:05:15 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 16:44:11 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/25 21:20:13 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,46 +54,67 @@ namespace ft {
 			
 		protected:
 		
-			struct Node
-			{
-				value_type		pair;
-				Node*			left;
-				Node*			right;
-				Node*			parent;
-				ssize_t			height;
-				
-				Node(Key key, T val)
-					: 	pair(value_type(key, val)), left(nullptr),
-						right(nullptr), parent(nullptr), height(-1) {}
-				~Node() {}
-			};
-			
+			typedef ft::map_node<value_type> Node;
+						
 			typedef typename Alloc::template rebind<Node>::other node_alloc;
 
-			template <bool is_const>
-			class avl_iterator;
+			template <typename U, bool is_const>
+			class avl_iterator : public base_avl_iterator<U, is_const>
+			{
+				protected:
+					using base_avl_iterator<U, is_const>::ptr;
+					using base_avl_iterator<U, is_const>::get;
+					using base_avl_iterator<U, is_const>::get_next;
+					using base_avl_iterator<U, is_const>::get_prev;
+				public:
+					typedef U value_type;
+					typedef typename choose<is_const, const U&, U&>::type reference;
+					typedef typename choose<is_const, const U*, U*>::type pointer;
+					typedef std::ptrdiff_t difference_type;
+					typedef std::random_access_iterator_tag iterator_category;
+					typedef typename remove_const<U>::type non_const_type;
+					typedef avl_iterator<non_const_type, false> non_const_iterator;
+					
+					avl_iterator() : base_avl_iterator<U, is_const>() {}
+					avl_iterator(Node* ptr, Node* const* tree)
+						: base_avl_iterator<U, is_const>(ptr, tree) {}
+					avl_iterator(const base_avl_iterator<non_const_type, false>& it)
+						: base_avl_iterator<U, is_const>(it.ptr) {}
+					avl_iterator(const avl_iterator<non_const_type, false>& target)
+						: base_avl_iterator<U, is_const>(target) {}
+					using base_avl_iterator<U, is_const>::operator=;
+					~avl_iterator() {}
+			};
 			
-			template <bool is_const>
-			class avl_reverse_iterator : public reverse_iterator< avl_iterator<is_const> >
+			template <typename I>
+			class avl_reverse_iterator : public base_reverse_iterator<I>
 			{
 				private:
-					typedef ft::reverse_iterator< avl_iterator<is_const> > reverse_iterator;
+					using base_reverse_iterator<I>::itbase;
+					typedef typename base_reverse_iterator<I>::non_const_iterator non_const_iterator;
 				public:
 					avl_reverse_iterator()
-						: reverse_iterator() {}
-					explicit avl_reverse_iterator(const avl_iterator<is_const>& it)
-						: reverse_iterator(it) {}
-					avl_reverse_iterator(const ft::reverse_iterator< avl_iterator<false> >& rev_it)
-						: reverse_iterator(rev_it) {}
+						: base_reverse_iterator<I>() {}
+					avl_reverse_iterator(const avl_reverse_iterator<non_const_iterator>& it)
+						: base_reverse_iterator<I>(it) {}
+					avl_reverse_iterator(const base_reverse_iterator<I>& rev_it)
+						: base_reverse_iterator<I>(rev_it.itbase) {}
+					using base_reverse_iterator<I>::operator=;
 					~avl_reverse_iterator() {}
 			};
+
+			template <typename U, bool is_const>
+			inline const base_avl_iterator<U, is_const>& bcast(const avl_iterator<U, is_const>& it) const
+			{
+				return *(base_avl_iterator<U, is_const>*)&it;
+			}
 			
 		public:
 		
-			typedef avl_iterator<false> iterator;
-			typedef avl_iterator<true> const_iterator;
-			typedef avl_reverse_iterator<false> reverse_iterator;
-			typedef avl_reverse_iterator<true> const_reverse_iterator;
+			typedef avl_iterator<value_type, false> iterator;
+			typedef avl_iterator<const value_type, true> const_iterator;
+			typedef avl_reverse_iterator<iterator> reverse_iterator;
+			typedef avl_reverse_iterator<const_iterator> const_reverse_iterator;
 			
 			explicit map(const key_compare& comp = key_compare());
 			template <typename I>
@@ -182,71 +203,7 @@ namespace ft {
 	};
 	
 
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	class map<Key, T, Cmp, Alloc>::avl_iterator
-	{
-		friend class map<Key, T, Cmp, Alloc>;
-		protected:
-			typedef typename choose<is_const, const Node*, Node*>::type node_pointer;
-			node_pointer					ptr;
-			const map<Key, T, Cmp, Alloc>*	map_ptr;
-			key_compare						m_comp;
-			node_pointer&					get() { return (ptr); }
-			avl_iterator					get_next(node_pointer root);
-			avl_iterator					get_prev(node_pointer root);
-			
-			bool							operator==(node_pointer b) { return (ptr == b); }
-			bool							operator!=(node_pointer b) { return (ptr != b); }
-			
-		public:
-			typedef std::pair<const key_type, mapped_type> value_type;
-			typedef typename choose<is_const, const value_type&, value_type&>::type reference;
-			typedef typename choose<is_const, const value_type*, value_type*>::type pointer;
-			typedef std::ptrdiff_t difference_type;
-			typedef std::bidirectional_iterator_tag iterator_category;
-			typedef avl_iterator<false> non_const_iterator;
-			
-			avl_iterator() : ptr(nullptr), map_ptr(nullptr) {}
-			avl_iterator(node_pointer p, const map<Key, T, Cmp, Alloc>* map, const key_compare& comp = key_compare())
-				: ptr(p), map_ptr(map), m_comp(comp) {}
-
-			avl_iterator(const avl_iterator<false>& target) { *this = target; }
-			avl_iterator&	operator=(const avl_iterator<false>& target);
-									
-			~avl_iterator() {}
-
-			pointer			operator->();
-			reference		operator*();
-			reference		operator*() const;
-
-			avl_iterator&	operator++();
-			avl_iterator	operator++(int) {
-				avl_iterator tmp(ptr, map_ptr, m_comp);
-				operator++();
-				return (tmp);
-			}
-
-			avl_iterator&	operator--();
-			avl_iterator	operator--(int) {
-				avl_iterator tmp(ptr, map_ptr, m_comp);
-				operator--();
-				return (tmp);
-			}
-			
-			template <bool A, bool B>
-			friend bool		operator==(const avl_iterator<A>& a,
-										const avl_iterator<B>& b) {
-				return (a.ptr == b.ptr);
-			}
-
-			template <bool A, bool B>
-			friend bool		operator!=(const avl_iterator<A>& a,
-										const avl_iterator<B>& b) {
-				return (a.ptr != b.ptr);
-			}
-			
-	};
+	
 
 
 
@@ -306,7 +263,7 @@ namespace ft {
 		Node* it = tree;
 		while (it && it->left)
 			it = it->left;
-		return (const_iterator(it, this, m_comp));
+		return (const_iterator(it, &tree));
 	}
 	template <class Key, class T, class Cmp, class Alloc>
 	typename map<Key, T, Cmp, Alloc>::iterator	map<Key, T, Cmp, Alloc>::begin()
@@ -314,19 +271,19 @@ namespace ft {
 		Node* it = tree;
 		while (it && it->left)
 			it = it->left;
-		return (iterator(it, this, m_comp));
+		return (iterator(it, &tree));
 	}
 
 	// END
 	template <class Key, class T, class Cmp, class Alloc>
 	typename map<Key, T, Cmp, Alloc>::const_iterator	map<Key, T, Cmp, Alloc>::end() const
 	{
-		return (const_iterator(nullptr, this, m_comp));
+		return (const_iterator(nullptr, &tree));
 	}
 	template <class Key, class T, class Cmp, class Alloc>
 	typename map<Key, T, Cmp, Alloc>::iterator	map<Key, T, Cmp, Alloc>::end()
 	{
-		return (iterator(nullptr, this, m_comp));
+		return (iterator(nullptr, &tree));
 	}
 
 	// RBEGIN
@@ -366,7 +323,7 @@ namespace ft {
 	map<Key, T, Cmp, Alloc>::insert(typename map<Key, T, Cmp, Alloc>::iterator position,
 									const typename map<Key, T, Cmp, Alloc>::value_type& val)
 	{
-		Node* pos_ptr = position.get();
+		Node* pos_ptr = bcast(position).ptr;
 		iterator nextpos(ft::fwd(position, 1));
 		bool current_next_is_end = (nextpos == end());
 		// 3 cases:
@@ -473,7 +430,7 @@ namespace ft {
 		Node* node = find_node(tree, k);
 		
 		if (node)
-			return iterator(node, this, m_comp);
+			return iterator(node, &tree);
 		else
 			return end();
 	}
@@ -483,7 +440,7 @@ namespace ft {
 		Node* node = find_node(tree, k);
 		
 		if (node)
-			return const_iterator(node, this, m_comp);
+			return const_iterator(node, &tree);
 		else
 			return end();
 	}
@@ -563,89 +520,12 @@ namespace ft {
 		else
 			return find->pair.second;
 	}
-
 	
 
 	// 88 888888 888888 88""Yb    db    888888  dP"Yb  88""Yb .dP"Y8 
 	// 88   88   88__   88__dP   dPYb     88   dP   Yb 88__dP `Ybo." 
 	// 88   88   88""   88"Yb   dP__Yb    88   Yb   dP 88"Yb  o.`Y8b 
 	// 88   88   888888 88  Yb dP""""Yb   88    YbodP  88  Yb 8bodP' 
-
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool B>
-	typename map<Key, T, Cmp, Alloc>::template avl_iterator<B>&
-	map<Key, T, Cmp, Alloc>::avl_iterator<B>::operator=(const avl_iterator<false>& target)
-	{
-		ptr = target.ptr;
-		map_ptr = target.map_ptr;
-		m_comp = target.m_comp;
-		return *this;
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename map<Key, T, Cmp, Alloc>::template avl_iterator<is_const>&
-	map<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator++()
-	{
-		if (*this == map_ptr->end())
-		{
-			Node* it = map_ptr->tree;
-			while (it && it->left)
-				it = it->left;
-			ptr = it;
-		}
-		else
-			*this = get_next(ptr);
-		return (*this);
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename map<Key, T, Cmp, Alloc>::template avl_iterator<is_const>&
-	map<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator--()
-	{
-		if (*this == map_ptr->end())
-		{
-			Node* it = map_ptr->tree;
-			while (it && it->right)
-				it = it->right;
-			ptr = it;
-		}
-		else
-			*this = get_prev(ptr);
-		return (*this);
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename map<Key, T, Cmp, Alloc>::template avl_iterator<is_const>::pointer
-	map<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator->()
-	{
-		if (ptr)
-			return &ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename map<Key, T, Cmp, Alloc>::template avl_iterator<is_const>::reference
-	map<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator*()
-	{
-		if (ptr)
-			return ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename map<Key, T, Cmp, Alloc>::template avl_iterator<is_const>::reference
-	map<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator*() const
-	{
-		if (ptr && ptr->pair)
-			return *ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
 	
 
 
@@ -701,7 +581,7 @@ namespace ft {
 		if (!root)
 		{
 			Node* new_node = node_alloc(m_alloc).allocate(1);
-			node_alloc(m_alloc).construct(new_node, Node(key, val));
+			node_alloc(m_alloc).construct(new_node, Node(std::pair<const Key, T>(key, val)));
 			return std::pair<Node*, bool>(new_node, true);
 		}
 
@@ -744,7 +624,8 @@ namespace ft {
 		rebalance_tree(nullptr, tree, key);
 		if (node_pair.second)
 			++m_size;
-		return std::pair<iterator, bool>(iterator(node_pair.first, this, m_comp), node_pair.second);
+		return std::pair<iterator, bool>
+		(iterator(node_pair.first, &tree), node_pair.second);
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
@@ -753,14 +634,14 @@ namespace ft {
 		Node* node = find_node(tree, key);
 		if (!node)
 			return (0);
-		iterator successor(node, this, m_comp);
+		iterator successor(node, &tree);
 		++successor;
-		iterator predecessor(node, this, m_comp);
+		iterator predecessor(node, &tree);
 		--predecessor;
 		Node* n = recursive_extract(nullptr, tree, key);
-		if (successor.get())
+		if (bcast(successor).ptr)
 			rebalance_tree(nullptr, tree, successor->first);
-		else if (predecessor.get())
+		else if (bcast(predecessor).ptr)
 			rebalance_tree(nullptr, tree, predecessor->first);
 		int del = n ? 1 : 0;
 		if (del)
@@ -965,53 +846,5 @@ namespace ft {
 	template <class Key, class T, class Cmp, class Alloc>
 	const typename map<Key, T, Cmp, Alloc>::Node*	map<Key, T, Cmp, Alloc>::get() { return (tree); }
 	
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename map<Key, T, Cmp, Alloc>::template avl_iterator<is_const>
-	map<Key, T, Cmp, Alloc>::avl_iterator<is_const>::get_next(node_pointer root)
-	{
-		if (root->right)
-		{
-			root = root->right;
-			while (root->left)
-				root = root->left;
-		}
-		else
-		{
-			node_pointer old;
-			do
-			{
-				old = root;
-				root = root->parent;
-				if (!root)
-					return avl_iterator<is_const>(nullptr, map_ptr, m_comp);
-			} while (root->right == old);		
-		}
-		return avl_iterator<is_const>(root, map_ptr, m_comp);
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename map<Key, T, Cmp, Alloc>::template avl_iterator<is_const>
-	map<Key, T, Cmp, Alloc>::avl_iterator<is_const>::get_prev(node_pointer root)
-	{
-		if (root->left)
-		{
-			root = root->left;
-			while (root->right)
-				root = root->right;
-		}
-		else
-		{
-			node_pointer old;
-			do
-			{
-				old = root;
-				root = root->parent;
-				if (!root)
-					return avl_iterator<is_const>(nullptr, map_ptr, m_comp);
-			} while (root->left == old);		
-		}
-		return avl_iterator<is_const>(root, map_ptr, m_comp);
-	}
+	
 }

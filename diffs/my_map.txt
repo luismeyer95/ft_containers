@@ -27,8 +27,7 @@ Map empty() = false
 * const iterators: begin() to end() *
 { (a, 4), (b, 2), (c, 3), (d, 4), (e, 7), (f, 9), (g, 10), (k, 1), (m, 5), (o, 7), (p, 4), (z, 6) }
 * iterators: rbegin() to rend() *
-{ (z, 6), (p, 4), (o, 7), (m, 5), (k, 1), (g, 10), (f, 9), (e, 7), (d, 4), (c, 3), (b, 2), (a, 4) }
-
+{ (z, 6), (p, 4), (o, 7), (m, 5), (k, 1), (g, 10), (f, 9), (e, 7), (d, 4), (c, 3), (b, 2), (a, 4)
  * erase() *
 -> key parameter: erasing 'o' and 'd'
 size = 10

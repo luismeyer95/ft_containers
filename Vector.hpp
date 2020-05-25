@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/25 17:33:13 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 14:58:10 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/25 15:31:33 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,23 +36,50 @@ namespace ft {
 			allocator_type	_alloc;
 			void		realloc(size_type nsize);
 
-			template <bool is_const>
-			class v_iterator;
-			
-			template <bool is_const>
-			class v_reverse_iterator : public reverse_iterator< v_iterator<is_const> >
+			template <typename U, bool is_const>
+			class v_iterator : public base_v_iterator<U, is_const>
 			{
-				private:
-					typedef ft::reverse_iterator< v_iterator<is_const> > reverse_iterator;
+				protected:
+					using base_v_iterator<U, is_const>::ptr;
+					using base_v_iterator<U, is_const>::get;
+				public:
+					typedef U value_type;
+					typedef typename choose<is_const, const U&, U&>::type reference;
+					typedef typename choose<is_const, const U*, U*>::type pointer;
+					typedef std::ptrdiff_t difference_type;
+					typedef std::random_access_iterator_tag iterator_category;
+					typedef typename remove_const<U>::type non_const_type;
+					typedef v_iterator<non_const_type, false> non_const_iterator;
+					
+					v_iterator() : base_v_iterator<U, is_const>() {}
+					v_iterator(const base_v_iterator<non_const_type, false>& it) : base_v_iterator<U, is_const>(it.ptr) {}
+					v_iterator(const v_iterator<non_const_type, false>& target) : base_v_iterator<U, is_const>(target) {}
+					using base_v_iterator<U, is_const>::operator=;
+					~v_iterator() {}
+			};
+			
+			template <typename I>
+			class v_reverse_iterator : public base_reverse_iterator<I>
+			{
+				protected:
+					using base_reverse_iterator<I>::itbase;
+					typedef typename base_reverse_iterator<I>::non_const_iterator non_const_iterator;
 				public:
 					v_reverse_iterator()
-						: reverse_iterator() {}
-					explicit v_reverse_iterator(const v_iterator<is_const>& it)
-						: reverse_iterator(it) {}
-					v_reverse_iterator(const ft::reverse_iterator< v_iterator<false> >& rev_it)
-						: reverse_iterator(rev_it) {}
+						: base_reverse_iterator<I>() {}
+					v_reverse_iterator(const v_reverse_iterator<non_const_iterator>& it)
+						: base_reverse_iterator<I>(it) {}
+					v_reverse_iterator(const base_reverse_iterator<I>& rev_it)
+						: base_reverse_iterator<I>(rev_it.itbase) {}
+					using base_reverse_iterator<I>::operator=;
 					~v_reverse_iterator() {}
 			};
+
+			template <typename U, bool is_const>
+			inline const base_v_iterator<U, is_const>& bcast(const v_iterator<U, is_const>& it) const
+			{
+				return *(base_v_iterator<U, is_const>*)&it;
+			}
 			
 		public:
 
@@ -65,10 +92,10 @@ namespace ft {
 			~vector();
 			
 			
-			typedef v_iterator<false> iterator;
-			typedef v_iterator<true> const_iterator;
-			typedef v_reverse_iterator<false> reverse_iterator;
-			typedef v_reverse_iterator<true> const_reverse_iterator;
+			typedef v_iterator<T, false> iterator;
+			typedef v_iterator<const T, true> const_iterator;
+			typedef v_reverse_iterator<iterator> reverse_iterator;
+			typedef v_reverse_iterator<const_iterator> const_reverse_iterator;
 			
 			size_type				size() const;
 			void					resize (size_type n, value_type val = value_type());
@@ -125,58 +152,6 @@ namespace ft {
 			friend bool operator>=(const vector<U, V>&, const vector<U, V>&);
 	};
 
-	template <typename T, class Alloc>
-	template <bool is_const>
-	class vector<T, Alloc>::v_iterator
-	{
-		friend class vector<T, Alloc>;
-		public:
-			typedef T value_type;
-			typedef typename choose<is_const, const T&, T&>::type reference;
-			typedef typename choose<is_const, const T*, T*>::type pointer;
-			typedef std::ptrdiff_t difference_type;
-			typedef std::random_access_iterator_tag iterator_category;
-			typedef v_iterator<false> non_const_iterator;
-			
-			v_iterator() : ptr(nullptr) {}
-			v_iterator(pointer p) : ptr(p) {}
-			v_iterator(const v_iterator<false>& target) { this->ptr = target.ptr; }
-			inline v_iterator&	operator=(const v_iterator<false>& target) { this->ptr = target.ptr; return *this; }
-			
-			~v_iterator() {}
-			inline	reference	operator*() { return *ptr; }
-			inline	reference	operator[](difference_type n) { return ptr[n]; }
-			inline	reference	operator[](difference_type n) const { return ptr[n]; }
-			inline	v_iterator	operator+(difference_type n) { return v_iterator(ptr + n); }
-			inline  v_iterator&	operator+=(difference_type n) { ptr += n; return *this; }
-			inline  v_iterator	operator-(difference_type n) { return v_iterator(ptr - n); }
-			inline  long long	operator-(const v_iterator& other) {
-				return ((long long)ptr - (long long)other.ptr) / (long long)sizeof(value_type);
-			}
-			inline  v_iterator&	operator-=(difference_type n) { ptr -= n; return *this; }
-			inline  v_iterator&	operator++() { ptr++; return (*this); }
-			inline  v_iterator	operator++(int) { v_iterator tmp(ptr); operator++(); return (tmp); }
-			inline  v_iterator&	operator--() { ptr--; return (*this); }
-			inline  v_iterator	operator--(int) { v_iterator tmp(ptr); operator--(); return (tmp); }
-
-			template <bool A, bool B>
-			friend inline bool			operator==(v_iterator<A> a, v_iterator<B> b) { return (a.ptr == b.ptr); }
-			template <bool A, bool B>
-			friend inline bool			operator!=(v_iterator<A> a, v_iterator<B> b) { return (a.ptr != b.ptr); }
-			template <bool A, bool B>
-			friend inline bool			operator<(v_iterator<A> a, v_iterator<B> b) { return (a.ptr < b.ptr); }
-			template <bool A, bool B>
-			friend inline bool			operator<=(v_iterator<A> a, v_iterator<B> b) { return (a.ptr <= b.ptr); }
-			template <bool A, bool B>
-			friend inline bool			operator>(v_iterator<A> a, v_iterator<B> b) { return (a.ptr > b.ptr); }
-			template <bool A, bool B>
-			friend inline bool			operator>=(v_iterator<A> a, v_iterator<B> b) { return (a.ptr >= b.ptr); }
-			
-		protected:
-			pointer			ptr;
-			inline pointer&	get() { return (ptr); }
-
-	};
 
 	/* CONSTRUCTORS + DESTRUCTOR */
 	template <typename T, class Alloc>
@@ -418,14 +393,14 @@ namespace ft {
 		position = iterator(_array + ind);
 		for (iterator b = --end(); b != position + n - 1; b--)
 		{
-			_alloc.destroy(b.get());
-			_alloc.construct(b.get(), *(b - n));
+			_alloc.destroy(bcast(b).ptr);
+			_alloc.construct(bcast(b).ptr, *(b - n));
 		}
 		I itb = first;
 		for (iterator b = position; itb != last; b++, itb++)
 		{
-			_alloc.destroy(b.get());
-			_alloc.construct(b.get(), *itb);
+			_alloc.destroy(bcast(b).ptr);
+			_alloc.construct(bcast(b).ptr, *itb);
 		}
 	}
 
@@ -440,8 +415,8 @@ namespace ft {
 		}
 		for (iterator it = position; it != this->end() - 1; ++it)
 		{
-			_alloc.destroy(it.get());
-			_alloc.construct(it.get(), *(it + 1));
+			_alloc.destroy(bcast(it).ptr);
+			_alloc.construct(bcast(it).ptr, *(it + 1));
 		}
 		_alloc.destroy(_array + _size - 1);
 		_size--;
@@ -531,8 +506,11 @@ namespace ft {
 	template <typename U, class V>
 	bool operator<(const vector<U, V>& lhs, const vector<U, V>& rhs)
 	{
-		return std::lexicographical_compare<typename vector<U, V>::const_iterator, typename vector<U, V>::const_iterator>
+		return std::lexicographical_compare<
+			base_v_iterator<const U, true>,
+			base_v_iterator<const U, true> >
 		(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return true;
 	}
 
 	template <typename U, class V>

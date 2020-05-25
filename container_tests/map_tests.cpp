@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/13 13:42:26 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 13:19:45 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/25 21:27:52 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ int	map_tester()
 			if (i != map.size() - 1)
 				std::cout << ", ";
 		}
-		std::cout << " }" << std::endl;
+
 	}
 	cout << endl;
 	cout << " * erase() *" << endl;
@@ -256,4 +256,31 @@ int main()
 	map_tester<ft::map<char, int, std::less<char>, ft::allocator<std::pair<const char, int> > > >();
 	
 	std::cout.rdbuf(coutbuf);
+
+	ft::map<int, char> bob;
+	ft::map<int, char>::iterator it = bob.begin();
+	ft::map<int, char>::const_iterator cit = bob.begin();
+	ft::map<int, char>::reverse_iterator rit = bob.rbegin();
+	ft::map<int, char>::const_reverse_iterator crit = bob.rbegin();
+
+	// it = it;
+	// it = cit;
+	// it = rit;
+	// it = crit;
+
+	// cit = cit;
+	// cit = it;
+	// cit = rit;
+	// cit = crit;
+
+	// rit = rit;
+	// rit = it;
+	// rit = cit;
+	// rit = crit;
+
+	// crit = it;
+	// crit = rit;
+	// crit = cit;
+	// crit = it;
+	
 }
