@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 16:16:15 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/25 16:40:37 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 12:50:26 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -495,14 +495,8 @@ namespace ft {
 	template<typename T, class Alloc>
 	void							list<T, Alloc>::swap(list<T, Alloc>& x)
 	{
-		size_t tmp_size = _size;
-		Node* tmp_ptr = sentry;
-
-		_size = x._size;
-		sentry = x.sentry;
-
-		x._size = tmp_size;
-		x.sentry = tmp_ptr;
+		std::swap(_size, x._size);
+		std::swap(sentry, x.sentry);
 	}
 
 	/* CLEAR */

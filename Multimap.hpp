@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/20 18:37:07 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 16:41:58 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 12:44:56 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,62 +36,100 @@ namespace ft {
 			{
 				private:
 					value_compare() {}
-					key_compare _cmp;
+					key_compare comp;
 				public:
 					typedef bool result_type;
 					typedef std::pair<const Key, T> first_argument_type;
 					typedef std::pair<const Key, T> second_argument_type;
-					value_compare(const value_compare &o) : _cmp(o._cmp) {}
-					value_compare(const key_compare &c) : _cmp(c) {}
+					value_compare(const value_compare &o) : comp(o.comp) {}
+					value_compare(const key_compare &c) : comp(c) {}
 					value_compare &operator=(const value_compare &other) 
 					{
-						_cmp = other._cmp;
+						comp = other.comp;
 						return *this;
 					}
 					~value_compare() {}
-					bool operator()(const std::pair<const Key, T>& x, const std::pair<const Key, T>& y) const { return _cmp(x.first, y.first); }
+					bool operator()(const std::pair<const Key, T>& a, const std::pair<const Key, T>& b) const
+					{
+						return comp(a.first, b.first);
+					}
 			};
 			
 		protected:
-			struct Node
-			{
-				value_type		pair;
-				Node*			left;
-				Node*			right;
-				Node*			parent;
-				ssize_t			height;
+			// struct Node
+			// {
+			// 	value_type		pair;
+			// 	Node*			left;
+			// 	Node*			right;
+			// 	Node*			parent;
+			// 	ssize_t			height;
 				
-				Node(Key key, T val, ssize_t height = -1)
-					: 	pair(value_type(key, val)), left(nullptr),
-						right(nullptr), parent(nullptr), height(height) {}
-				~Node() {}
-			};
+			// 	Node(Key key, T val, ssize_t height = -1)
+			// 		: 	pair(value_type(key, val)), left(nullptr),
+			// 			right(nullptr), parent(nullptr), height(height) {}
+			// 	~Node() {}
+			// };
+			typedef ft::map_node<value_type> Node;
+
 			typedef typename Alloc::template rebind<Node>::other node_alloc;
 
-			template <bool is_const>
-			class avl_iterator;
+			template <typename U, bool is_const>
+			class avl_iterator : public base_avl_iterator<U, is_const>
+			{
+				protected:
+					using base_avl_iterator<U, is_const>::ptr;
+					using base_avl_iterator<U, is_const>::get;
+					using base_avl_iterator<U, is_const>::get_next;
+					using base_avl_iterator<U, is_const>::get_prev;
+				public:
+					typedef U value_type;
+					typedef typename choose<is_const, const U&, U&>::type reference;
+					typedef typename choose<is_const, const U*, U*>::type pointer;
+					typedef std::ptrdiff_t difference_type;
+					typedef std::bidirectional_iterator_tag iterator_category;
+					typedef typename remove_const<U>::type non_const_type;
+					typedef avl_iterator<non_const_type, false> non_const_iterator;
+					
+					avl_iterator() : base_avl_iterator<U, is_const>() {}
+					avl_iterator(Node* ptr, Node* const* tree)
+						: base_avl_iterator<U, is_const>(ptr, tree) {}
+					avl_iterator(const base_avl_iterator<non_const_type, false>& it)
+						: base_avl_iterator<U, is_const>(it.ptr) {}
+					avl_iterator(const non_const_iterator& target)
+						: base_avl_iterator<U, is_const>(target) {}
+					using base_avl_iterator<U, is_const>::operator=;
+					~avl_iterator() {}
+			};
 			
-			template <bool is_const>
-			class avl_reverse_iterator : public reverse_iterator< avl_iterator<is_const> >
+			template <typename I>
+			class avl_reverse_iterator : public base_reverse_iterator<I>
 			{
 				private:
-					typedef ft::reverse_iterator< avl_iterator<is_const> > reverse_iterator;
+					using base_reverse_iterator<I>::itbase;
+					typedef typename base_reverse_iterator<I>::non_const_iterator non_const_iterator;
 				public:
 					avl_reverse_iterator()
-						: reverse_iterator() {}
-					explicit avl_reverse_iterator(const avl_iterator<is_const>& it)
-						: reverse_iterator(it) {}
-					avl_reverse_iterator(const ft::reverse_iterator< avl_iterator<false> >& rev_it)
-						: reverse_iterator(rev_it) {}
+						: base_reverse_iterator<I>() {}
+					avl_reverse_iterator(const avl_reverse_iterator<non_const_iterator>& it)
+						: base_reverse_iterator<I>(it) {}
+					avl_reverse_iterator(const base_reverse_iterator<I>& rev_it)
+						: base_reverse_iterator<I>(rev_it.itbase) {}
+					using base_reverse_iterator<I>::operator=;
 					~avl_reverse_iterator() {}
 			};
+
+			template <typename U, bool is_const>
+			inline const base_avl_iterator<U, is_const>& bcast(const avl_iterator<U, is_const>& it) const
+			{
+				return *(base_avl_iterator<U, is_const>*)&it;
+			}
 			
 		public:
 		
-			typedef avl_iterator<false> iterator;
-			typedef avl_iterator<true> const_iterator;
-			typedef avl_reverse_iterator<false> reverse_iterator;
-			typedef avl_reverse_iterator<true> const_reverse_iterator;
+			typedef avl_iterator<value_type, false> iterator;
+			typedef avl_iterator<const value_type, true> const_iterator;
+			typedef avl_reverse_iterator<iterator> reverse_iterator;
+			typedef avl_reverse_iterator<const_iterator> const_reverse_iterator;
 			
 			explicit multimap(const key_compare& comp = key_compare());
 			template <typename I>
@@ -179,74 +217,6 @@ namespace ft {
 			void						print_root(const Node* root);
 			void						free_tree(Node*& root);
 	};
-	
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	class multimap<Key, T, Cmp, Alloc>::avl_iterator
-	{
-		friend class multimap<Key, T, Cmp, Alloc>;
-		protected:
-			typedef typename choose<is_const, const Node*, Node*>::type node_pointer;
-			node_pointer					ptr;
-			const multimap<Key, T, Cmp, Alloc>*	multimap_ptr;
-			key_compare						m_comp;
-			node_pointer&					get() { return (ptr); }
-			avl_iterator					get_next(node_pointer root);
-			avl_iterator					get_prev(node_pointer root);
-			
-			
-			bool							operator==(node_pointer b) { return (ptr == b); }
-			bool							operator!=(node_pointer b) { return (ptr != b); }
-			
-		public:
-			typedef std::pair<const key_type, mapped_type> value_type;
-			typedef typename choose<is_const, const value_type&, value_type&>::type reference;
-			typedef typename choose<is_const, const value_type*, value_type*>::type pointer;
-			typedef std::ptrdiff_t difference_type;
-			typedef std::bidirectional_iterator_tag iterator_category;
-			typedef avl_iterator<false> non_const_iterator;
-			
-			avl_iterator() : ptr(nullptr), multimap_ptr(nullptr) {}
-			avl_iterator(node_pointer p, const multimap<Key, T, Cmp, Alloc>* multimap, const key_compare& comp = key_compare())
-				: ptr(p), multimap_ptr(multimap), m_comp(comp) {}
-
-			avl_iterator(const avl_iterator<false>& target) { *this = target; }
-			avl_iterator&	operator=(const avl_iterator<false>& target);
-									
-			~avl_iterator() {}
-
-			pointer			operator->();
-			reference		operator*();
-			reference		operator*() const;
-
-			avl_iterator&	operator++();
-			avl_iterator	operator++(int) {
-				avl_iterator tmp(ptr, multimap_ptr, m_comp);
-				operator++();
-				return (tmp);
-			}
-
-			avl_iterator&	operator--();
-			avl_iterator	operator--(int) {
-				avl_iterator tmp(ptr, multimap_ptr, m_comp);
-				operator--();
-				return (tmp);
-			}
-			
-			template <bool A, bool B>
-			friend bool		operator==(const avl_iterator<A>& a,
-										const avl_iterator<B>& b) {
-				return (a.ptr == b.ptr);
-			}
-
-			template <bool A, bool B>
-			friend bool		operator!=(const avl_iterator<A>& a,
-										const avl_iterator<B>& b) {
-				return (a.ptr != b.ptr);
-			}
-			
-	};
 
 
 
@@ -282,7 +252,7 @@ namespace ft {
 		free_tree(tree);
 		m_size = 0;
 		m_comp = target.m_comp;
-		for (multimap<Key, T, Cmp, Alloc>::const_iterator it = target.begin(); it != target.end(); ++it)
+		for (const_iterator it = target.begin(); it != target.end(); ++it)
 			insert_node(tree, it->first, it->second, false);
 		return (*this);
 	}
@@ -306,7 +276,7 @@ namespace ft {
 		Node* it = tree;
 		while (it && it->left)
 			it = it->left;
-		return (const_iterator(it, this, m_comp));
+		return (const_iterator(it, &tree));
 	}
 	template <class Key, class T, class Cmp, class Alloc>
 	typename multimap<Key, T, Cmp, Alloc>::iterator	multimap<Key, T, Cmp, Alloc>::begin()
@@ -314,19 +284,19 @@ namespace ft {
 		Node* it = tree;
 		while (it && it->left)
 			it = it->left;
-		return (iterator(it, this, m_comp));
+		return (iterator(it, &tree));
 	}
 
 	// END
 	template <class Key, class T, class Cmp, class Alloc>
 	typename multimap<Key, T, Cmp, Alloc>::const_iterator	multimap<Key, T, Cmp, Alloc>::end() const
 	{
-		return (const_iterator(nullptr, this, m_comp));
+		return (const_iterator(nullptr, &tree));
 	}
 	template <class Key, class T, class Cmp, class Alloc>
 	typename multimap<Key, T, Cmp, Alloc>::iterator	multimap<Key, T, Cmp, Alloc>::end()
 	{
-		return (iterator(nullptr, this, m_comp));
+		return (iterator(nullptr, &tree));
 	}
 
 	// RBEGIN
@@ -363,9 +333,9 @@ namespace ft {
 	template <class Key, class T, class Cmp, class Alloc>
 	typename multimap<Key, T, Cmp, Alloc>::iterator	multimap<Key, T, Cmp, Alloc>::insert(typename multimap<Key, T, Cmp, Alloc>::iterator position, const typename multimap<Key, T, Cmp, Alloc>::value_type& val)
 	{
-		Node* pos_ptr = position.get();
+		Node* pos_ptr = bcast(position).ptr;
 		iterator prevpos(ft::fwd(position, -1));
-		Node* prev_ptr = prevpos.get();
+		Node* prev_ptr = bcast(prevpos).ptr;
 		bool current_pos_is_end = (position == end());
 		bool current_prev_is_end = (prevpos == end());
 		if (current_pos_is_end && current_prev_is_end)
@@ -373,7 +343,7 @@ namespace ft {
 		bool pos_supeq = current_pos_is_end || !m_comp(position->first, val.first);
 		bool prev_infeq = current_prev_is_end || !m_comp(val.first, prevpos->first);
 		// 2 cases:
-		// -> position is a valid hint: would directly precede/equal val, insert from position node down to optimize
+		// -> position is a valid hint and would directly precede/equal val: insert from position node down to optimize
 		// -> otherwise insert and return the iterator
 		if (pos_supeq && prev_infeq) 
 			return insert_next_to(prev_ptr, pos_ptr, val.first, val.second);
@@ -393,7 +363,7 @@ namespace ft {
 	template <class Key, class T, class Cmp, class Alloc>
 	void	multimap<Key, T, Cmp, Alloc>::erase(iterator position)
 	{
-		delete_node(position->first, position.get());
+		delete_node(position->first, bcast(position).ptr);
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
@@ -412,7 +382,7 @@ namespace ft {
 		while (it != last)
 		{
 			iterator successor = ft::fwd(it, 1);
-			delete_node(it->first, it.get());
+			delete_node(it->first, bcast(it).ptr);
 			it = successor;
 		}
 	}
@@ -475,7 +445,7 @@ namespace ft {
 		Node* node = find_node(tree, k);
 		
 		if (node)
-			return iterator(node, this, m_comp);
+			return iterator(node, &tree);
 		else
 			return end();
 	}
@@ -485,7 +455,7 @@ namespace ft {
 		Node* node = find_node(tree, k);
 		
 		if (node)
-			return const_iterator(node, this, m_comp);
+			return const_iterator(node, &tree);
 		else
 			return end();
 	}
@@ -498,7 +468,7 @@ namespace ft {
 		if (!node)
 			return (0);
 		size_type count = 0;
-		const_iterator it(node, this, m_comp);
+		const_iterator it(node, &tree);
 		while (it != end() && key_equal(it->first, k))
 		{
 			++count;
@@ -564,89 +534,6 @@ namespace ft {
 	{
 		return std::pair<iterator, iterator>(lower_bound(k), upper_bound(k));
 	}
-	
-
-	// 88 888888 888888 88""Yb    db    888888  dP"Yb  88""Yb .dP"Y8 
-	// 88   88   88__   88__dP   dPYb     88   dP   Yb 88__dP `Ybo." 
-	// 88   88   88""   88"Yb   dP__Yb    88   Yb   dP 88"Yb  o.`Y8b 
-	// 88   88   888888 88  Yb dP""""Yb   88    YbodP  88  Yb 8bodP' 
-
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool B>
-	typename multimap<Key, T, Cmp, Alloc>::template avl_iterator<B>&
-	multimap<Key, T, Cmp, Alloc>::avl_iterator<B>::operator=(const avl_iterator<false>& target)
-	{
-		ptr = target.ptr;
-		multimap_ptr = target.multimap_ptr;
-		m_comp = target.m_comp;
-		return *this;
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multimap<Key, T, Cmp, Alloc>::template avl_iterator<is_const>&
-	multimap<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator++()
-	{
-		if (*this == multimap_ptr->end())
-		{
-			Node* it = multimap_ptr->tree;
-			while (it && it->left)
-				it = it->left;
-			ptr = it;
-		}
-		else
-			*this = get_next(ptr);
-		return (*this);
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multimap<Key, T, Cmp, Alloc>::template avl_iterator<is_const>&
-	multimap<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator--()
-	{
-		if (*this == multimap_ptr->end())
-		{
-			Node* it = multimap_ptr->tree;
-			while (it && it->right)
-				it = it->right;
-			ptr = it;
-		}
-		else
-			*this = get_prev(ptr);
-		return (*this);
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multimap<Key, T, Cmp, Alloc>::template avl_iterator<is_const>::pointer
-	multimap<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator->()
-	{
-		if (ptr)
-			return &ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multimap<Key, T, Cmp, Alloc>::template avl_iterator<is_const>::reference
-	multimap<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator*()
-	{
-		if (ptr)
-			return ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multimap<Key, T, Cmp, Alloc>::template avl_iterator<is_const>::reference
-	multimap<Key, T, Cmp, Alloc>::avl_iterator<is_const>::operator*() const
-	{
-		if (ptr && ptr->pair)
-			return *ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
-	
 
 
 	// 888888  dP"Yb   dP"Yb  88     .dP"Y8 
@@ -712,7 +599,8 @@ namespace ft {
 		if (!root)
 		{
 			Node* new_node = node_alloc(m_alloc).allocate(1);
-			node_alloc(m_alloc).construct(new_node, Node(key, val, 0));
+			node_alloc(m_alloc).construct(new_node, Node(std::pair<const Key, T>(key, val)));
+			new_node->height = 0;
 			return std::pair<Node*, bool>(new_node, true);
 		}
 
@@ -746,13 +634,15 @@ namespace ft {
 		rebalance_tree(node_pair.first);
 		if (node_pair.second)
 			++m_size;
-		return std::pair<iterator, bool>(iterator(node_pair.first, this, m_comp), node_pair.second);
+		return std::pair<iterator, bool>(iterator(node_pair.first, &tree), node_pair.second);
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
 	typename multimap<Key, T, Cmp, Alloc>::iterator 	multimap<Key, T, Cmp, Alloc>::insert_next_to(Node* root, Node* next, Key key, T val)
 	{
-		Node* node = new Node(key, val, 0);
+		Node* node = node_alloc(m_alloc).allocate(1);
+		node_alloc(m_alloc).construct(node, Node(std::pair<const Key, T>(key, val)));
+		node->height = 0;
 		if (!root)
 			link_left(next, node);
 		else if (!next)
@@ -769,7 +659,7 @@ namespace ft {
 		}
 		rebalance_tree(node);
 		++m_size;
-		return iterator(node, this, m_comp);
+		return iterator(node, &tree);
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
@@ -997,53 +887,4 @@ namespace ft {
 	template <class Key, class T, class Cmp, class Alloc>
 	const typename multimap<Key, T, Cmp, Alloc>::Node*	multimap<Key, T, Cmp, Alloc>::get() const { return (tree); }
 
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multimap<Key, T, Cmp, Alloc>::template avl_iterator<is_const>
-	multimap<Key, T, Cmp, Alloc>::avl_iterator<is_const>::get_next(node_pointer root)
-	{
-		if (root->right)
-		{
-			root = root->right;
-			while (root->left)
-				root = root->left;
-		}
-		else
-		{
-			node_pointer old;
-			do
-			{
-				old = root;
-				root = root->parent;
-				if (!root)
-					return avl_iterator<is_const>(nullptr, multimap_ptr, m_comp);
-			} while (root->right == old);		
-		}
-		return avl_iterator<is_const>(root, multimap_ptr, m_comp);
-	}
-
-	template <class Key, class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multimap<Key, T, Cmp, Alloc>::template avl_iterator<is_const>
-	multimap<Key, T, Cmp, Alloc>::avl_iterator<is_const>::get_prev(node_pointer root)
-	{
-		if (root->left)
-		{
-			root = root->left;
-			while (root->right)
-				root = root->right;
-		}
-		else
-		{
-			node_pointer old;
-			do
-			{
-				old = root;
-				root = root->parent;
-				if (!root)
-					return avl_iterator<is_const>(nullptr, multimap_ptr, m_comp);
-			} while (root->left == old);		
-		}
-		return avl_iterator<is_const>(root, multimap_ptr, m_comp);
-	}
 }

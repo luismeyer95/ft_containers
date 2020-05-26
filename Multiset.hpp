@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/20 18:38:19 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 14:41:42 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 13:20:44 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,45 +33,67 @@ namespace ft {
 			typedef std::ptrdiff_t difference_type;
 			
 		protected:
-			struct Node
-			{
-				value_type		pair;
-				Node*			left;
-				Node*			right;
-				Node*			parent;
-				ssize_t			height;
-				
-				Node(key_type key, ssize_t height = -1)
-					: 	pair(key), left(nullptr),
-						right(nullptr), parent(nullptr), height(height) {}
-				~Node() {}
-			};
+		
+			typedef ft::map_node<value_type> Node;
+			typedef const Node* node_pointer;
+
 			typedef typename Alloc::template rebind<Node>::other node_alloc;
 
-			template <bool is_const>
-			class avl_iterator;
+			template <typename U, bool is_const>
+			class avl_iterator : public base_avl_iterator<U, is_const>
+			{
+				protected:
+					using base_avl_iterator<U, is_const>::ptr;
+					using base_avl_iterator<U, is_const>::get;
+					using base_avl_iterator<U, is_const>::get_next;
+					using base_avl_iterator<U, is_const>::get_prev;
+				public:
+					typedef U value_type;
+					typedef typename choose<is_const, const U&, U&>::type reference;
+					typedef typename choose<is_const, const U*, U*>::type pointer;
+					typedef typename remove_const<U>::type non_const_type;
+					typedef avl_iterator<non_const_type, false> non_const_iterator;
+					
+					avl_iterator() : base_avl_iterator<U, is_const>() {}
+					avl_iterator(Node* ptr, Node* const* tree)
+						: base_avl_iterator<U, is_const>(ptr, tree) {}
+					avl_iterator(const base_avl_iterator<non_const_type, false>& it)
+						: base_avl_iterator<U, is_const>(it.ptr) {}
+					avl_iterator(const non_const_iterator& target)
+						: base_avl_iterator<U, is_const>(target) {}
+					using base_avl_iterator<U, is_const>::operator=;
+					~avl_iterator() {}
+			};
 			
-			template <bool is_const>
-			class avl_reverse_iterator : public reverse_iterator< avl_iterator<is_const> >
+			template <typename I>
+			class avl_reverse_iterator : public base_reverse_iterator<I>
 			{
 				private:
-					typedef ft::reverse_iterator< avl_iterator<is_const> > reverse_iterator;
+					using base_reverse_iterator<I>::itbase;
+					typedef typename base_reverse_iterator<I>::non_const_iterator non_const_iterator;
 				public:
 					avl_reverse_iterator()
-						: reverse_iterator() {}
-					explicit avl_reverse_iterator(const avl_iterator<is_const>& it)
-						: reverse_iterator(it) {}
-					avl_reverse_iterator(const ft::reverse_iterator< avl_iterator<false> >& rev_it)
-						: reverse_iterator(rev_it) {}
+						: base_reverse_iterator<I>() {}
+					avl_reverse_iterator(const avl_reverse_iterator<non_const_iterator>& it)
+						: base_reverse_iterator<I>(it) {}
+					avl_reverse_iterator(const base_reverse_iterator<I>& rev_it)
+						: base_reverse_iterator<I>(rev_it.itbase) {}
+					using base_reverse_iterator<I>::operator=;
 					~avl_reverse_iterator() {}
 			};
+
+			template <typename U, bool is_const>
+			inline const base_avl_iterator<U, is_const>& bcast(const avl_iterator<U, is_const>& it) const
+			{
+				return *(base_avl_iterator<U, is_const>*)&it;
+			}
 			
 		public:
 		
-			typedef avl_iterator<true> iterator;
-			typedef avl_iterator<true> const_iterator;
-			typedef avl_reverse_iterator<true> reverse_iterator;
-			typedef avl_reverse_iterator<true> const_reverse_iterator;
+			typedef avl_iterator<const value_type, true> const_iterator;
+			typedef const_iterator iterator;
+			typedef avl_reverse_iterator<const_iterator> const_reverse_iterator;
+			typedef const_reverse_iterator reverse_iterator;
 			
 			explicit multiset(const key_compare& comp = key_compare());
 			template <typename I>
@@ -158,73 +180,6 @@ namespace ft {
 			void						print_root(const Node* root);
 			void						free_tree(Node*& root);
 	};
-	
-
-	template <class T, class Cmp, class Alloc>
-	template <bool is_const>
-	class multiset<T, Cmp, Alloc>::avl_iterator
-	{
-		friend class multiset<T, Cmp, Alloc>;
-		protected:
-			typedef typename choose<is_const, const Node*, Node*>::type node_pointer;
-			node_pointer					ptr;
-			const multiset<T, Cmp, Alloc>*	multiset_ptr;
-			key_compare						m_comp;
-			node_pointer&					get() { return (ptr); }
-			avl_iterator					get_next(node_pointer root);
-			avl_iterator					get_prev(node_pointer root);
-			
-			bool							operator==(node_pointer b) { return (ptr == b); }
-			bool							operator!=(node_pointer b) { return (ptr != b); }
-			
-		public:
-			typedef T value_type;
-			typedef typename choose<is_const, const value_type&, value_type&>::type reference;
-			typedef typename choose<is_const, const value_type*, value_type*>::type pointer;
-			typedef std::ptrdiff_t difference_type;
-			typedef std::bidirectional_iterator_tag iterator_category;
-			typedef avl_iterator<false> non_const_iterator;
-			
-			avl_iterator() : ptr(nullptr), multiset_ptr(nullptr) {}
-			avl_iterator(node_pointer p, const multiset<T, Cmp, Alloc>* multiset, const key_compare& comp = key_compare())
-				: ptr(p), multiset_ptr(multiset), m_comp(comp) {}
-
-			avl_iterator(const avl_iterator<false>& target) { *this = target; }
-			avl_iterator&	operator=(const avl_iterator<false>& target);
-									
-			~avl_iterator() {}
-
-			pointer			operator->();
-			reference		operator*();
-			reference		operator*() const;
-
-			avl_iterator&	operator++();
-			avl_iterator	operator++(int) {
-				avl_iterator tmp(ptr, multiset_ptr, m_comp);
-				operator++();
-				return (tmp);
-			}
-
-			avl_iterator&	operator--();
-			avl_iterator	operator--(int) {
-				avl_iterator tmp(ptr, multiset_ptr, m_comp);
-				operator--();
-				return (tmp);
-			}
-			
-			template <bool A, bool B>
-			friend bool		operator==(const avl_iterator<A>& a,
-										const avl_iterator<B>& b) {
-				return (a.ptr == b.ptr);
-			}
-
-			template <bool A, bool B>
-			friend bool		operator!=(const avl_iterator<A>& a,
-										const avl_iterator<B>& b) {
-				return (a.ptr != b.ptr);
-			}
-			
-	};
 
 
 
@@ -284,7 +239,7 @@ namespace ft {
 		Node* it = tree;
 		while (it && it->left)
 			it = it->left;
-		return (const_iterator(it, this, m_comp));
+		return (const_iterator(it, &tree));
 	}
 	template <class T, class Cmp, class Alloc>
 	typename multiset<T, Cmp, Alloc>::iterator	multiset<T, Cmp, Alloc>::begin()
@@ -292,19 +247,19 @@ namespace ft {
 		Node* it = tree;
 		while (it && it->left)
 			it = it->left;
-		return (iterator(it, this, m_comp));
+		return (iterator(it, &tree));
 	}
 
 	// END
 	template <class T, class Cmp, class Alloc>
 	typename multiset<T, Cmp, Alloc>::const_iterator	multiset<T, Cmp, Alloc>::end() const
 	{
-		return (const_iterator(nullptr, this, m_comp));
+		return (const_iterator(nullptr, &tree));
 	}
 	template <class T, class Cmp, class Alloc>
 	typename multiset<T, Cmp, Alloc>::iterator	multiset<T, Cmp, Alloc>::end()
 	{
-		return (iterator(nullptr, this, m_comp));
+		return (iterator(nullptr, &tree));
 	}
 
 	// RBEGIN
@@ -341,14 +296,14 @@ namespace ft {
 	template <class T, class Cmp, class Alloc>
 	typename multiset<T, Cmp, Alloc>::iterator	multiset<T, Cmp, Alloc>::insert(typename multiset<T, Cmp, Alloc>::iterator position, const typename multiset<T, Cmp, Alloc>::value_type& val)
 	{
-		Node* pos_ptr = const_cast<Node*>(position.get());
+		Node* pos_ptr = const_cast<Node*>(bcast(position).ptr);
 		iterator nextpos(ft::fwd(position, 1));
 		bool current_next_is_end = (nextpos == end());
 		bool pos_infeq = m_comp(*position, val) || key_equal(*position, val);
 		bool next_supeq = current_next_is_end || m_comp(val, *nextpos)
 		|| key_equal(val, *nextpos);
 		// 2 cases:
-		// -> position is a valid hint: would directly precede/equal val, insert from position node down to optimize
+		// -> position is a valid hint and would directly precede/equal val: insert from position node down to optimize
 		// -> otherwise insert and return the iterator
 		if (pos_ptr && pos_infeq && next_supeq)
 			return insert_node(pos_ptr, val).first;
@@ -368,7 +323,7 @@ namespace ft {
 	template <class T, class Cmp, class Alloc>
 	void	multiset<T, Cmp, Alloc>::erase(iterator position)
 	{
-		delete_node(*position, const_cast<Node*>(position.get()));
+		delete_node(*position, const_cast<Node*>(bcast(position).ptr));
 	}
 
 	template <class T, class Cmp, class Alloc>
@@ -387,7 +342,7 @@ namespace ft {
 		while (it != last)
 		{
 			iterator successor = ft::fwd(it, 1);
-			delete_node(*it, const_cast<Node*>(it.get()));
+			delete_node(*it, const_cast<Node*>(bcast(it).ptr));
 			it = successor;
 		}
 	}
@@ -450,7 +405,7 @@ namespace ft {
 		Node* node = find_node(tree, k);
 		
 		if (node)
-			return iterator(node, this, m_comp);
+			return iterator(node, &tree);
 		else
 			return end();
 	}
@@ -460,7 +415,7 @@ namespace ft {
 		Node* node = find_node(tree, k);
 		
 		if (node)
-			return const_iterator(node, this, m_comp);
+			return const_iterator(node, &tree);
 		else
 			return end();
 	}
@@ -473,7 +428,7 @@ namespace ft {
 		if (!node)
 			return (0);
 		size_type count = 0;
-		const_iterator it(node, this, m_comp);
+		const_iterator it(node, &tree);
 		while (it != end() && key_equal(*it, k))
 		{
 			++count;
@@ -539,89 +494,6 @@ namespace ft {
 	{
 		return std::pair<iterator, iterator>(lower_bound(k), upper_bound(k));
 	}
-	
-
-	// 88 888888 888888 88""Yb    db    888888  dP"Yb  88""Yb .dP"Y8 
-	// 88   88   88__   88__dP   dPYb     88   dP   Yb 88__dP `Ybo." 
-	// 88   88   88""   88"Yb   dP__Yb    88   Yb   dP 88"Yb  o.`Y8b 
-	// 88   88   888888 88  Yb dP""""Yb   88    YbodP  88  Yb 8bodP' 
-
-
-	template <class T, class Cmp, class Alloc>
-	template <bool B>
-	typename multiset<T, Cmp, Alloc>::template avl_iterator<B>&
-	multiset<T, Cmp, Alloc>::avl_iterator<B>::operator=(const avl_iterator<false>& target)
-	{
-		ptr = target.ptr;
-		multiset_ptr = target.multiset_ptr;
-		m_comp = target.m_comp;
-		return *this;
-	}
-
-	template <class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multiset<T, Cmp, Alloc>::template avl_iterator<is_const>&
-	multiset<T, Cmp, Alloc>::avl_iterator<is_const>::operator++()
-	{
-		if (*this == multiset_ptr->end())
-		{
-			Node* it = multiset_ptr->tree;
-			while (it && it->left)
-				it = it->left;
-			ptr = it;
-		}
-		else
-			*this = get_next(ptr);
-		return (*this);
-	}
-
-	template <class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multiset<T, Cmp, Alloc>::template avl_iterator<is_const>&
-	multiset<T, Cmp, Alloc>::avl_iterator<is_const>::operator--()
-	{
-		if (*this == multiset_ptr->end())
-		{
-			Node* it = multiset_ptr->tree;
-			while (it && it->right)
-				it = it->right;
-			ptr = it;
-		}
-		else
-			*this = get_prev(ptr);
-		return (*this);
-	}
-
-	template <class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multiset<T, Cmp, Alloc>::template avl_iterator<is_const>::pointer
-	multiset<T, Cmp, Alloc>::avl_iterator<is_const>::operator->()
-	{
-		if (ptr)
-			return &ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
-
-	template <class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multiset<T, Cmp, Alloc>::template avl_iterator<is_const>::reference
-	multiset<T, Cmp, Alloc>::avl_iterator<is_const>::operator*()
-	{
-		if (ptr)
-			return ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
-
-	template <class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multiset<T, Cmp, Alloc>::template avl_iterator<is_const>::reference
-	multiset<T, Cmp, Alloc>::avl_iterator<is_const>::operator*() const
-	{
-		if (ptr && ptr->pair)
-			return *ptr->pair;
-		throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-	}
-	
 
 
 	// 888888  dP"Yb   dP"Yb  88     .dP"Y8 
@@ -688,7 +560,8 @@ namespace ft {
 		if (!root)
 		{
 			Node* new_node = node_alloc(m_alloc).allocate(1);
-			node_alloc(m_alloc).construct(new_node, Node(key, 0));
+			node_alloc(m_alloc).construct(new_node, Node(key));
+			new_node->height = 0;
 			return std::pair<Node*, bool>(new_node, true);
 		}
 
@@ -722,7 +595,7 @@ namespace ft {
 		rebalance_tree(node_pair.first->parent);
 		if (node_pair.second)
 			++m_size;
-		return std::pair<iterator, bool>(iterator(node_pair.first, this, m_comp), node_pair.second);
+		return std::pair<iterator, bool>(iterator(node_pair.first, &tree), node_pair.second);
 	}
 
 	template <class T, class Cmp, class Alloc>
@@ -936,53 +809,4 @@ namespace ft {
 	template <class T, class Cmp, class Alloc>
 	const typename multiset<T, Cmp, Alloc>::Node*	multiset<T, Cmp, Alloc>::get() const { return (tree); }
 
-	template <class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multiset<T, Cmp, Alloc>::template avl_iterator<is_const>
-	multiset<T, Cmp, Alloc>::avl_iterator<is_const>::get_next(node_pointer root)
-	{
-		if (root->right)
-		{
-			root = root->right;
-			while (root->left)
-				root = root->left;
-		}
-		else
-		{
-			node_pointer old;
-			do
-			{
-				old = root;
-				root = root->parent;
-				if (!root)
-					return avl_iterator<is_const>(nullptr, multiset_ptr, m_comp);
-			} while (root->right == old);		
-		}
-		return avl_iterator<is_const>(root, multiset_ptr, m_comp);
-	}
-
-	template <class T, class Cmp, class Alloc>
-	template <bool is_const>
-	typename multiset<T, Cmp, Alloc>::template avl_iterator<is_const>
-	multiset<T, Cmp, Alloc>::avl_iterator<is_const>::get_prev(node_pointer root)
-	{
-		if (root->left)
-		{
-			root = root->left;
-			while (root->right)
-				root = root->right;
-		}
-		else
-		{
-			node_pointer old;
-			do
-			{
-				old = root;
-				root = root->parent;
-				if (!root)
-					return avl_iterator<is_const>(nullptr, multiset_ptr, m_comp);
-			} while (root->left == old);		
-		}
-		return avl_iterator<is_const>(root, multiset_ptr, m_comp);
-	}
 }

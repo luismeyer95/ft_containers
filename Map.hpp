@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/11 13:05:15 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/25 21:20:13 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 12:52:48 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,20 +36,23 @@ namespace ft {
 			{
 				private:
 					value_compare() {}
-					key_compare _cmp;
+					key_compare comp;
 				public:
 					typedef bool result_type;
 					typedef std::pair<const Key, T> first_argument_type;
 					typedef std::pair<const Key, T> second_argument_type;
-					value_compare(const value_compare &o) : _cmp(o._cmp) {}
-					value_compare(const key_compare &c) : _cmp(c) {}
+					value_compare(const value_compare &o) : comp(o.comp) {}
+					value_compare(const key_compare &c) : comp(c) {}
 					value_compare &operator=(const value_compare &other) 
 					{
-						_cmp = other._cmp;
+						comp = other.comp;
 						return *this;
 					}
 					~value_compare() {}
-					bool operator()(const std::pair<const Key, T>& x, const std::pair<const Key, T>& y) const { return _cmp(x.first, y.first); }
+					bool operator()(const std::pair<const Key, T>& a, const std::pair<const Key, T>& b) const
+					{
+						return comp(a.first, b.first);
+					}
 			};
 			
 		protected:
@@ -71,7 +74,7 @@ namespace ft {
 					typedef typename choose<is_const, const U&, U&>::type reference;
 					typedef typename choose<is_const, const U*, U*>::type pointer;
 					typedef std::ptrdiff_t difference_type;
-					typedef std::random_access_iterator_tag iterator_category;
+					typedef std::bidirectional_iterator_tag iterator_category;
 					typedef typename remove_const<U>::type non_const_type;
 					typedef avl_iterator<non_const_type, false> non_const_iterator;
 					
@@ -80,7 +83,7 @@ namespace ft {
 						: base_avl_iterator<U, is_const>(ptr, tree) {}
 					avl_iterator(const base_avl_iterator<non_const_type, false>& it)
 						: base_avl_iterator<U, is_const>(it.ptr) {}
-					avl_iterator(const avl_iterator<non_const_type, false>& target)
+					avl_iterator(const non_const_iterator& target)
 						: base_avl_iterator<U, is_const>(target) {}
 					using base_avl_iterator<U, is_const>::operator=;
 					~avl_iterator() {}
@@ -327,8 +330,8 @@ namespace ft {
 		iterator nextpos(ft::fwd(position, 1));
 		bool current_next_is_end = (nextpos == end());
 		// 3 cases:
-		// -> position is a valid hint: would directly precede val, insert from position node down to optimize
-		// -> val key = position successor's key, just return successor
+		// -> position is a valid hint and would directly precede val: insert from position node down to optimize
+		// -> val key = successor's key, just return the successor
 		// -> otherwise insert and return the iterator
 		if (pos_ptr && m_comp(position->first, val.first)
 			&& (current_next_is_end || m_comp(val.first, nextpos->first)))
@@ -845,6 +848,5 @@ namespace ft {
 
 	template <class Key, class T, class Cmp, class Alloc>
 	const typename map<Key, T, Cmp, Alloc>::Node*	map<Key, T, Cmp, Alloc>::get() { return (tree); }
-	
 	
 }
