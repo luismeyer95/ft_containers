@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 14:46:12 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 13:31:27 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 16:00:42 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,18 @@
 #include <set>
 #include "../utils.hpp"
 
-template <typename T, class Alloc>
-std::ostream &operator<<(std::ostream &stream, const std::vector<T, Alloc> &e)
+template <class T, class Alloc>
+std::ostream&	operator<<(std::ostream& stream, std::vector<T, Alloc>& target)
 {
-	for (size_t i(0); i < e.size(); i++)
+	std::cout << "{ ";
+	size_t i = 0;
+	for (typename std::vector<T, Alloc>::iterator it = target.begin(); it != target.end(); ++it, ++i)
 	{
-		stream << e[i];
-		if (i != e.size() - 1)
+		std::cout << "(" << *it << ")";
+		if (i != target.size() - 1)
 			std::cout << ", ";
 	}
+	std::cout << " }" << std::endl;
 	return (stream);
 }
 
@@ -138,15 +141,18 @@ std::ostream &operator<<(std::ostream &stream, const std::pair<A, B> &e)
 	return (stream);
 }
 
-template<typename T, class Alloc>
+template <class T, class Alloc>
 std::ostream&	operator<<(std::ostream& stream, ft::vector<T, Alloc>& target)
 {
-	for (size_t i(0); i < target.size(); i++)
+	std::cout << "{ ";
+	size_t i = 0;
+	for (typename ft::vector<T, Alloc>::iterator it = target.begin(); it != target.end(); ++it, ++i)
 	{
-		stream << target[i];
+		std::cout << "(" << *it << ")";
 		if (i != target.size() - 1)
 			std::cout << ", ";
 	}
+	std::cout << " }" << std::endl;
 	return (stream);
 }
 

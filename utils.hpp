@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/08 15:08:39 by luis              #+#    #+#             */
-/*   Updated: 2020/05/26 15:34:54 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 15:42:59 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -527,13 +527,14 @@ namespace ft {
 			}
 			~base_dq_iterator() {}
 			
-			inline	reference	operator*() { return dq->_pmap[head / dq->_chunksize][head % dq->_chunksize]; }
-			inline	reference	operator[](difference_type n) { return *(*this + n); }
-			inline	reference	operator[](difference_type n) const { *(*this + n); }
+			inline	reference			operator*() { return dq->_pmap[head / dq->_chunksize][head % dq->_chunksize]; }
+			inline	reference			operator[](difference_type n) { return *(*this + n); }
+			inline	reference			operator[](difference_type n) const { *(*this + n); }
 			inline	base_dq_iterator	operator+(difference_type n) { base_dq_iterator tmp(*this); while (n--) ++tmp; return tmp; }
 			inline  base_dq_iterator&	operator+=(difference_type n) { *this = *this + n; return *this; }
 			inline  base_dq_iterator	operator-(difference_type n) { base_dq_iterator tmp(*this); while (n--) --tmp; return tmp; }
 			inline  base_dq_iterator&	operator-=(difference_type n) { *this = *this + n; return *this; }
+
 			inline  base_dq_iterator&	operator++()
 			{
 				if (head == dq->_tail)
@@ -545,6 +546,7 @@ namespace ft {
 				return (*this);
 			}
 			inline  base_dq_iterator	operator++(int) { base_dq_iterator tmp(*this); operator++(); return (tmp); }
+
 			inline  base_dq_iterator&	operator--()
 			{
 				if (head == dq->_head)
@@ -556,7 +558,8 @@ namespace ft {
 				return (*this);
 			}
 			inline  base_dq_iterator	operator--(int) { base_dq_iterator tmp(*this); operator--(); return (tmp); }
-			inline  long long	operator-(const base_dq_iterator& other)
+
+			inline  long long			operator-(const base_dq_iterator& other)
 			{
 				bool pos = *this > other;
 				base_dq_iterator first(!pos ? *this : other);

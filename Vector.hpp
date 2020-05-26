@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/25 17:33:13 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 15:27:10 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 17:23:02 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,14 @@ namespace ft {
 
 	/* POP_BACK */
 	template <typename T, class Alloc>
-	void		vector<T, Alloc>::pop_back() { _size ? _size-- : 0; }
+	void		vector<T, Alloc>::pop_back()
+	{
+		if (_size)
+		{
+			_alloc.destroy(_array + _size - 1);
+			--_size;
+		}
+	}
 
 
 	/* ITERATEURS */

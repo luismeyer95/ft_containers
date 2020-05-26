@@ -16,6 +16,42 @@
 #include <map>
 #include <set>
 #include <deque>
+// #include <iostream>
+
+using std::cout;
+using std::endl;
+
+#define PRINT(x) x;\
+				c_info(ct);
+
+class Foo
+{
+	private:
+		int*	arr;
+		int		n;
+	public:
+		Foo(int n) : n(n) { arr = new int[n]; }
+		Foo(const Foo& o) : n(o.n) { arr = new int[n]; }
+		Foo& operator=(const Foo& o)
+		{
+			delete[] arr;
+			n = o.n;
+			arr = new int[n];
+			return *this;
+		}
+		~Foo()
+		{
+			delete[] arr;
+			arr = nullptr;
+		}
+		friend std::ostream& operator<<(std::ostream& o, const Foo& foo)
+		{
+			o << "foo[" << foo.n << "]";
+			return o;
+		}
+};
+
+
 
 template <typename C>
 void	ctnr_tester()
@@ -26,21 +62,24 @@ void	ctnr_tester()
 	typedef typename C::reverse_iterator reverse_iterator;
 	typedef typename C::const_reverse_iterator const_reverse_iterator;
 
-	value_type arr[] = {42, 3, 2, 6, 1};
-	C vec(arr, arr + sizeof(arr)/sizeof(arr[0]));
+	C ct;
+	typedef std::pair<char, Foo> pair;
 
-	c_info(vec);
-
+	// ct['e'] = Foo(2);
+	PRINT(ct.insert(pair('a', Foo(4))));
+	PRINT(ct.insert(pair('y', Foo(5))));
+	PRINT(ct.insert(pair('c', Foo(6))));
+	PRINT(ct.insert(pair('b', Foo(7))));
+	PRINT(ct.insert(pair('z', Foo(8))));
 }
 
 int main()
 {
 	std::cout << " ** real ** " << std::endl;
-	ctnr_tester< std::vector<int> >();
-	std::cout << std::endl;
+	ctnr_tester< std::map<char, Foo, std::greater<char> > >();
 
 	std::cout << " ** mine ** " << std::endl;
-	ctnr_tester< ft::vector<int> >();
-	std::cout << std::endl;
+	ctnr_tester< ft::map<char, Foo, std::greater<char> > >();
+
 }
 

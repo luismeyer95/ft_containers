@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/22 09:06:03 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 15:36:24 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 19:09:19 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,6 @@ namespace ft {
 			size_type				max_size() const;
 			size_type				capacity() const;
 			bool					empty() const;
-			void					reserve(size_type n);
 			void					push_back(const value_type& e);
 			void					push_front(const value_type& e);
 			void					pop_back();
@@ -180,7 +179,7 @@ namespace ft {
 	}
 
 	template <typename T, class Alloc>
-	deque<T, Alloc>::deque(size_t n, const T& val, const allocator_type& alloc)
+	deque<T, Alloc>::deque(size_type n, const T& val, const allocator_type& alloc)
 		: _alloc(alloc)
 	{
 		dq._chunksize = std::max(16 * sizeof(value_type), 4096ul) / sizeof(value_type);
@@ -216,12 +215,11 @@ namespace ft {
 	template <typename T, class Alloc>
 	deque<T, Alloc>::~deque()
 	{
+		for (iterator it = begin(); it != end(); ++it)
+			_alloc.destroy(&(*it));
 		for (typename ft::vector<pointer>::iterator it = dq._pmap.begin(); it != dq._pmap.end(); ++it)
-		{
-			for (size_type i = 0; i < dq._chunksize; ++i)
-				_alloc.destroy(*it + i);
 			_alloc.deallocate(*it, dq._chunksize);
-		}
+		dq._pmap.clear();
 	}
 
 
@@ -255,14 +253,14 @@ namespace ft {
 		}
 	}
 
-	/* MAXdq._size */
+	/* MAX_SIZE */
 	template <typename T, class Alloc>
 	size_t		deque<T, Alloc>::max_size() const { return (std::numeric_limits<size_type>::max() / sizeof(value_type)); }
 
 
 	/* EMPTY */
 	template <typename T, class Alloc>
-	bool 		deque<T, Alloc>::empty() const { return (dq._head == -1 && dq._tail == -1); }
+	bool 		deque<T, Alloc>::empty() const { return !dq._size; }
 
 	/* PUSH_BACK */
 	template <typename T, class Alloc>
@@ -695,7 +693,7 @@ namespace ft {
 		}
 		for (size_type i = 0; i < nb_chunks - 1; ++i)
 			dq._pmap.insert(dq._pmap.begin() + dq._tailchunk + 1, _alloc.allocate(dq._chunksize));
-		if (dq._head == dq._tail + 1)
+		if (dq._head > dq._tail)
 		{
 			dq._headchunk += nb_chunks;
 			dq._head += nb_chunks * dq._chunksize;

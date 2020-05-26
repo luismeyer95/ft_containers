@@ -1,34 +1,42 @@
 * creating vector of size 0 *
 size = 0
+{  }
 
 
 * construct and fill *
 size = 6
-3, 3, 3, 3, 3, 3
+{ (3), (3), (3), (3), (3), (3) }
+
 * pushed {1, 4, 2, 7, 9} consecutively *
 Front : 1, back : 9
 size = 5
-1, 4, 2, 7, 9
+{ (1), (4), (2), (7), (9) }
+
 
 * popped 2 values *
 size = 3
-1, 4, 2
+{ (1), (4), (2) }
+
 
 * inserted array {9, 10, 11, 12} before the 2nd index *
 size = 7
-1, 4, 9, 10, 11, 12, 2
+{ (1), (4), (9), (10), (11), (12), (2) }
+
 
 * erased vec[6] *
 size = 6
-1, 4, 9, 10, 11, 12
+{ (1), (4), (9), (10), (11), (12) }
+
 
 * erased elements [2; 5[ *
 size = 3
-1, 4, 12
+{ (1), (4), (12) }
+
 
 * assigning array {4, 9, 18, 98, 7, 32, 1, -9, 5, 21} to vec *
 size = 10
-4, 9, 18, 98, 7, 32, 1, -9, 5, 21
+{ (4), (9), (18), (98), (7), (32), (1), (-9), (5), (21) }
+
 * assignment operator '=' *  -->  success
 * copy constructor *  -->  success
 * swap (both member and non-member) *  -->  success, success
@@ -57,10 +65,14 @@ rlast < rend() ? success
 -> success
 
 * comparison operator overloads *
-yo, ca, va
-oui, et, toi
-le, bon, steak
-le, cpp, c cool
+{ (yo), (ca), (va) }
+
+{ (oui), (et), (toi) }
+
+{ (le), (bon), (steak) }
+
+{ (le), (cpp), (c cool) }
+
 == --> success
 != --> success
 >  --> success
