@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/08 15:08:39 by luis              #+#    #+#             */
-/*   Updated: 2020/05/26 13:06:52 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 15:34:54 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,6 +225,24 @@ namespace ft {
 			: 	pair(val), left(nullptr),
 				right(nullptr), parent(nullptr), height(-1) {}
 		~map_node() {}
+	};
+
+	template <typename T>
+	struct deque_node
+	{
+		ft::vector<T*>	_pmap;
+		size_t			_size;
+		size_t			_capacity;
+		size_t			_chunksize;
+		ssize_t			_head;
+		size_t			_headchunk;
+		ssize_t			_tail;
+		size_t			_tailchunk;
+		deque_node()
+			:	_size(0), _capacity(0), _chunksize(0),
+				_head(-1), _headchunk(0),
+				_tail(-1), _tailchunk(0) {}
+		~deque_node() {}
 	};
 
 	template <typename T, bool is_const>
@@ -480,6 +498,118 @@ namespace ft {
 			
 			T*			ptr;
 			T&	get() { return (ptr); }
+	};
+
+	template <typename T, bool is_const>
+	class base_dq_iterator
+	{
+		public:
+			typedef T value_type;
+			typedef typename choose<is_const, const T&, T&>::type reference;
+			typedef typename choose<is_const, const T*, T*>::type pointer;
+			typedef std::ptrdiff_t difference_type;
+			typedef size_t size_type;
+			typedef std::random_access_iterator_tag iterator_category;
+			typedef typename remove_const<T>::type non_const_type;
+			typedef base_dq_iterator<non_const_type, false> non_const_iterator;
+
+			ssize_t								head;
+			const deque_node<non_const_type>*	dq;
+			
+			base_dq_iterator() : head(0), dq(nullptr) {}
+			base_dq_iterator(ssize_t head, const deque_node<non_const_type>* dq) : head(head), dq(dq) {}
+			base_dq_iterator(const non_const_iterator& target) : head(target.head), dq(target.dq) {}
+			inline base_dq_iterator&	operator=(const non_const_iterator& target)
+			{
+				this->dq = target.dq;
+				this->head = target.head;
+				return *this;
+			}
+			~base_dq_iterator() {}
+			
+			inline	reference	operator*() { return dq->_pmap[head / dq->_chunksize][head % dq->_chunksize]; }
+			inline	reference	operator[](difference_type n) { return *(*this + n); }
+			inline	reference	operator[](difference_type n) const { *(*this + n); }
+			inline	base_dq_iterator	operator+(difference_type n) { base_dq_iterator tmp(*this); while (n--) ++tmp; return tmp; }
+			inline  base_dq_iterator&	operator+=(difference_type n) { *this = *this + n; return *this; }
+			inline  base_dq_iterator	operator-(difference_type n) { base_dq_iterator tmp(*this); while (n--) --tmp; return tmp; }
+			inline  base_dq_iterator&	operator-=(difference_type n) { *this = *this + n; return *this; }
+			inline  base_dq_iterator&	operator++()
+			{
+				if (head == dq->_tail)
+					head = -1;
+				else if (head == -1)
+					head = dq->_head;
+				else
+					head = circular_increment(head + 1, dq->_capacity);
+				return (*this);
+			}
+			inline  base_dq_iterator	operator++(int) { base_dq_iterator tmp(*this); operator++(); return (tmp); }
+			inline  base_dq_iterator&	operator--()
+			{
+				if (head == dq->_head)
+					head = -1;
+				else if (head == -1)
+					head = dq->_tail;
+				else
+					head = circular_increment(head - 1, dq->_capacity);
+				return (*this);
+			}
+			inline  base_dq_iterator	operator--(int) { base_dq_iterator tmp(*this); operator--(); return (tmp); }
+			inline  long long	operator-(const base_dq_iterator& other)
+			{
+				bool pos = *this > other;
+				base_dq_iterator first(!pos ? *this : other);
+				base_dq_iterator target(!pos ? other : *this);
+				long long count = 0;
+				long long sign = pos ? 1 : -1;
+				while (true)
+				{
+					if (first == target)
+						return (count * sign);
+					++first;
+					++count;
+					if (count > (long long)dq->_size)
+						throw std::invalid_argument("Error: invalid comparison on deque iterator");
+				}
+			}
+
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator==(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
+			{ return (a.dq && a.dq == b.dq && a.head == b.head); }
+
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator!=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
+			{ return (a.dq && a.dq == b.dq && a.head != b.head); }
+			
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator<(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
+			{
+				if (!a.dq || a.dq != b.dq || a.head == -1)
+					return false;
+				if (b.head == -1)
+					return true;
+				if (a.dq->_head < a.dq->_tail)
+					return a.head < b.head;
+				long long diff_a = (long long)a.head - (long long)a.dq->_head;
+				long long diff_b = (long long)b.head - (long long)a.dq->_head;
+				long long shift_a = circular_clamp(diff_a, 0, a.dq->_capacity);
+				long long shift_b = circular_clamp(diff_b, 0, a.dq->_capacity);
+				return (shift_a < shift_b);
+			}
+
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator<=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
+			{ return (a.dq && a.dq == b.dq && !(a > b)); }
+
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator>(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
+			{ return (a.dq && a.dq == b.dq && !(a < b) && a != b); }
+			
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator>=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
+			{ return (a.dq && a.dq == b.dq && !(a < b)); }
+
 	};
 
 	

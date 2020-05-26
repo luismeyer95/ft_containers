@@ -1,0 +1,114 @@
+* creating map of size 0 *
+size = 0
+{  }
+
+Map empty() = true
+
+Map max_size() = 461168601842738790
+* inserted {c, e, b, a, d, k} consecutively *
+size = 6
+{ (a, 4), (b, 2), (c, 3), (d, 4), (e, 7), (k, 1) }
+
+* checking return values / changes when inserting * :
+success
+success
+size = 8
+{ (a, 4), (b, 2), (c, 3), (d, 4), (e, 7), (f, 9), (g, 10), (k, 1) }
+
+* checking range-inserting * :
+size = 12
+{ (a, 4), (b, 2), (c, 3), (d, 4), (e, 7), (f, 9), (g, 10), (k, 1), (m, 5), (o, 7), (p, 4), (z, 6) }
+
+Map size() = 12
+Map empty() = false
+
+* iterators: begin() to end() *
+{ (a, 4), (b, 2), (c, 3), (d, 4), (e, 7), (f, 9), (g, 10), (k, 1), (m, 5), (o, 7), (p, 4), (z, 6) }
+* const iterators: begin() to end() *
+{ (a, 4), (b, 2), (c, 3), (d, 4), (e, 7), (f, 9), (g, 10), (k, 1), (m, 5), (o, 7), (p, 4), (z, 6) }
+* iterators: rbegin() to rend() *
+{ (z, 6), (p, 4), (o, 7), (m, 5), (k, 1), (g, 10), (f, 9), (e, 7), (d, 4), (c, 3), (b, 2), (a, 4)
+ * erase() *
+-> key parameter: erasing 'o' and 'd'
+size = 10
+{ (a, 4), (b, 2), (c, 3), (e, 7), (f, 9), (g, 10), (k, 1), (m, 5), (p, 4), (z, 6) }
+
+-> iterator parameter: erasing 'e' and 'k'
+size = 8
+{ (a, 4), (b, 2), (c, 3), (f, 9), (g, 10), (m, 5), (p, 4), (z, 6) }
+
+-> iterator range: erasing ['c', 'm'[
+size = 5
+{ (a, 4), (b, 2), (m, 5), (p, 4), (z, 6) }
+
+* constructors/assignment op *
+-> construct from iterators [first + 1, last - 1]
+size = 3
+{ (b, 2), (m, 5), (p, 4) }
+
+-> copy construction
+size = 3
+{ (b, 2), (m, 5), (p, 4) }
+
+-> assignment (operator=)
+size = 5
+{ (a, 4), (b, 2), (m, 5), (p, 4), (z, 6) }
+
+* swap() *
+-> printing map then map_bis
+size = 5
+{ (a, 4), (b, 2), (m, 5), (p, 4), (z, 6) }
+
+size = 2
+{ (m, 5), (p, 4) }
+
+-> printing map then map_bis
+size = 2
+{ (m, 5), (p, 4) }
+
+size = 5
+{ (a, 4), (b, 2), (m, 5), (p, 4), (z, 6) }
+
+* clear() *
+-> before clear()
+size = 2
+{ (m, 5), (p, 4) }
+
+-> after clear()
+size = 0
+{  }
+
+* key_comp() *
+-> success
+* value_comp() *
+-> success
+size = 5
+{ (a, 4), (b, 2), (m, 5), (p, 4), (z, 6) }
+
+* find(), count() *
+-> 'b' found, mapped = 2, count = 1
+-> 'z' found, mapped = 6, count = 1
+-> 'y' not found, count = 0
+
+* lower_bound(), upper_bound() *
+size = 7
+{ (a, 4), (b, 2), (m, 5), (p, 4), (q, 9), (w, 3), (z, 6) }
+
+ -> lower_bound('c') = m
+ -> upper_bound('p') = q
+ -> equal_range('m') = size = 1
+{ (m, 5) }
+
+ -> equal_range('c') = size = 0
+{  }
+
+* assigning from dereferenced non-const iterators *
+--> success
+* const map member access *
+--> success
+* iterators and constness *
+-> success
+-> success
+-> success
+-> success
+

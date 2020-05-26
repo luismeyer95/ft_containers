@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/11 13:05:15 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 12:52:48 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 13:44:54 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -523,12 +523,6 @@ namespace ft {
 		else
 			return find->pair.second;
 	}
-	
-
-	// 88 888888 888888 88""Yb    db    888888  dP"Yb  88""Yb .dP"Y8 
-	// 88   88   88__   88__dP   dPYb     88   dP   Yb 88__dP `Ybo." 
-	// 88   88   88""   88"Yb   dP__Yb    88   Yb   dP 88"Yb  o.`Y8b 
-	// 88   88   888888 88  Yb dP""""Yb   88    YbodP  88  Yb 8bodP' 
 	
 
 

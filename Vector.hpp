@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/25 17:33:13 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/25 15:31:33 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 15:27:10 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,8 +352,8 @@ namespace ft {
 		}
 		for (iterator b = this->end(); b != position; b--)
 		{
-			_alloc.destroy(b.get());
-			_alloc.construct(b.get(), *(b - 1));
+			_alloc.destroy(bcast(b).ptr);
+			_alloc.construct(bcast(b).ptr, *(b - 1));
 		}
 		*position = val;
 		_size++;
@@ -370,13 +370,13 @@ namespace ft {
 		position = _array + ind;
 		for (iterator b = --end(); b != position + n - 1; b--)
 		{
-			_alloc.destroy(b.get());
-			_alloc.construct(b.get(), *(b - n));
+			_alloc.destroy(bcast(b).ptr);
+			_alloc.construct(bcast(b).ptr, *(b - n));
 		}
 		for (iterator b = position; b != position + n; b++)
 		{
-			_alloc.destroy(b.get());
-			_alloc.construct(b.get(), val);
+			_alloc.destroy(bcast(b).ptr);
+			_alloc.construct(bcast(b).ptr, val);
 		}
 	}
 
