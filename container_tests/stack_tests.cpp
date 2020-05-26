@@ -6,14 +6,13 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 14:49:05 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 13:50:49 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 21:27:35 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stack>
 #include <fstream>
-#include "../Stack.hpp"
-#include "Containers.hpp"
+#include "../Containers.hpp"
 #define ENDLL endl << endl
 using std::cout;
 using std::endl;

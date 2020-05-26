@@ -6,16 +6,16 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 13:59:18 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/24 13:51:11 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 21:03:16 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "BaseIterators.hpp"
 #include "Vector.hpp"
 #include "Deque.hpp"
 #include "List.hpp"
-#include "utils.hpp"
 
 namespace ft {
 

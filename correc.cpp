@@ -1,23 +1,5 @@
-#include "Vector.hpp"
-#include "List.hpp"
-#include "Stack.hpp"
-#include "Map.hpp"
-#include "Queue.hpp"
-#include "Set.hpp"
-#include "Multiset.hpp"
-#include "Multimap.hpp"
-#include "Deque.hpp"
-#include "container_tests/Containers.hpp"
 
-#include <vector>
-#include <list>
-#include <stack>
-#include <queue>
-#include <map>
-#include <set>
-#include <deque>
-// #include <iostream>
-
+#include "Containers.hpp"
 using std::cout;
 using std::endl;
 
@@ -51,8 +33,6 @@ class Foo
 		}
 };
 
-
-
 template <typename C>
 void	ctnr_tester()
 {
@@ -71,15 +51,18 @@ void	ctnr_tester()
 	PRINT(ct.insert(pair('c', Foo(6))));
 	PRINT(ct.insert(pair('b', Foo(7))));
 	PRINT(ct.insert(pair('z', Foo(8))));
+
+	PRINT(ct.erase(ct.begin(), ct.end()));
 }
 
 int main()
 {
-	std::cout << " ** real ** " << std::endl;
-	ctnr_tester< std::map<char, Foo, std::greater<char> > >();
+	// std::cout << " ** real ** " << std::endl;
+	// ctnr_tester< std::map<char, Foo, std::greater<char> > >();
 
 	std::cout << " ** mine ** " << std::endl;
 	ctnr_tester< ft::map<char, Foo, std::greater<char> > >();
 
+	
 }
 

@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 16:16:15 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 12:50:26 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 21:17:21 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,11 +94,6 @@ namespace ft {
 			{
 				return *(base_lst_iterator<U, is_const>*)&it;
 			}
-			// template <typename U, bool is_const>
-			// inline const base_lst_iterator<U, is_const>& bcast(const base_lst_iterator<U, is_const>& it) const
-			// {
-			// 	return *(base_lst_iterator<U, is_const>*)&it;
-			// }
 			
 		public:
 
@@ -470,7 +465,7 @@ namespace ft {
 	template<typename T, class Alloc>
 	typename list<T, Alloc>::iterator	list<T, Alloc>::erase(iterator position)
 	{
-		iterator next(position + 1);
+		iterator next(fwd(position, 1));
 		delete_node(bcast(position).ptr);
 		_size--;
 		return (next);
@@ -483,7 +478,7 @@ namespace ft {
 		iterator it = first;
 		while (it != last)
 		{
-			next = ft::fwd(it, 1);
+			next = fwd(it, 1);
 			delete_node(bcast(it).ptr);
 			it = next;
 			_size--;
@@ -527,8 +522,8 @@ namespace ft {
 		while (it != last)
 		{
 			pit = bcast(it).ptr;
-			next = it + 1;
-			insert_node(unlink(pit), bcast(ft::fwd(position, -1)).ptr, bcast(position).ptr);
+			next = fwd(it, 1);
+			insert_node(unlink(pit), bcast(fwd(position, -1)).ptr, bcast(position).ptr);
 			_size++;
 			x._size--;
 			it = next;
@@ -557,7 +552,7 @@ namespace ft {
 	{
 		iterator it = ++begin();
 		while (it != end())
-			*it == *(it - 1) ? it = erase(it) : it++;
+			*it == *(fwd(it, -1)) ? it = erase(it) : it++;
 	}
 
 	template<typename T, class Alloc>
@@ -567,7 +562,7 @@ namespace ft {
 		iterator it = ++begin();
 		while (it != end())
 		{
-			if (binary_pred(*(it - 1), *it))
+			if (binary_pred(*fwd(it, -1), *it))
 				it = erase(it);
 			else
 				++it;
@@ -584,7 +579,7 @@ namespace ft {
 		{
 			while (it != end() && !(*itx < *it))
 				it++;
-			next = itx + 1;
+			next = fwd(itx, 1);
 			splice(it, x, itx);
 			itx = next;
 		}
@@ -601,7 +596,7 @@ namespace ft {
 		{
 			while (it != end() && !comp(*itx, *it))
 				it++;
-			next = itx + 1;
+			next = fwd(itx, 1);
 			splice(it, x, itx);
 			itx = next;
 		}
@@ -613,7 +608,7 @@ namespace ft {
 		typename list<T, Alloc>::iterator it = ++begin();
 		while (it != end())
 		{
-			if (*it < *(it - 1))
+			if (*it < *fwd(it, -1))
 			{
 				swap_nodes(bcast(it).ptr->prev, bcast(it).ptr);
 				if (it == begin())
@@ -631,7 +626,7 @@ namespace ft {
 		typename list<T, Alloc>::iterator it = ++begin();
 		while (it != end())
 		{
-			if (comp(*it, *(it - 1)))
+			if (comp(*it, *fwd(it, -1)))
 			{
 				swap_nodes(bcast(it).ptr->prev, bcast(it).ptr);
 				if (it == begin())
@@ -716,20 +711,6 @@ namespace ft {
 	bool operator>=(const list<U, V>& lhs, const list<U, V>& rhs)
 	{
 		return (!(lhs < rhs));
-	}
-
-	template<typename T, class Alloc>
-	std::ostream&	operator<<(std::ostream& stream, const list<T, Alloc>& target)
-	{
-		stream << "{";
-		for (typename list<T, Alloc>::const_iterator it = target.begin(); it != target.end(); it++)
-		{
-			stream << *it;
-			if (ft::fwd(it, 1) != target.end())
-				std::cout << ", ";
-		}
-		stream << "}";
-		return (stream);
 	}
 
 	/* NON-MEMBER SWAP */

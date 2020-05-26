@@ -6,13 +6,12 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/13 13:42:26 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/25 21:27:52 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 21:26:08 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <map>
-#include "../Map.hpp"
-#include "Containers.hpp"
+#include "../Containers.hpp"
 #include <fstream>
 #define ENDLL endl << endl
 using std::cout;

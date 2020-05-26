@@ -6,13 +6,13 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/20 18:37:07 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 12:44:56 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 21:35:44 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "utils.hpp"
+#include "BaseIterators.hpp"
 
 namespace ft {
 
@@ -719,7 +719,8 @@ namespace ft {
 		else
 		{
 			tree = to_link;
-			to_link->parent = nullptr;
+			if (to_link)
+				to_link->parent = nullptr;
 		}
 		extracted = root;
 		parent = to_update;

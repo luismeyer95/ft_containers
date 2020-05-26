@@ -6,13 +6,12 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 14:49:05 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/25 16:28:29 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/26 21:25:53 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <list>
-#include "Containers.hpp"
-#include "../List.hpp"
+#include "../Containers.hpp"
 #include <fstream>
 #define ENDLL endl << endl
 using std::cout;
