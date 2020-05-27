@@ -49,20 +49,45 @@ void	ctnr_tester()
 	PRINT(ct.insert(pair('a', Foo(4))));
 	PRINT(ct.insert(pair('y', Foo(5))));
 	PRINT(ct.insert(pair('c', Foo(6))));
+	PRINT(ct.insert(pair('c', Foo(9))));
+	PRINT(ct.insert(pair('c', Foo(10))));
 	PRINT(ct.insert(pair('b', Foo(7))));
 	PRINT(ct.insert(pair('z', Foo(8))));
 
-	PRINT(ct.erase(ct.begin(), ct.end()));
+	// PRINT(ct.erase(ct.begin(), ct.end()));
+	PRINT(ct.erase(ft::fwd(ct.end(), -4)));
 }
 
 int main()
 {
-	// std::cout << " ** real ** " << std::endl;
-	// ctnr_tester< std::map<char, Foo, std::greater<char> > >();
+	std::cout << " ** real ** " << std::endl;
+	ctnr_tester< std::multimap<char, Foo, std::greater<char> > >();
 
 	std::cout << " ** mine ** " << std::endl;
-	ctnr_tester< ft::map<char, Foo, std::greater<char> > >();
+	ctnr_tester< ft::multimap<char, Foo, std::greater<char> > >();
 
-	
+	ft::vector<int> bob;
+	ft::vector<int>::reverse_iterator rit= bob.rbegin();
+	ft::vector<int>::const_reverse_iterator crit = bob.rend();
+
+	// it = it;
+	// it = cit;
+	// it = rit;
+	// it = crit;
+
+	// cit = cit;
+	// cit = it;
+	// cit = rit;
+	// cit = crit;
+
+	// rit = rit;
+	// rit = it;
+	// rit = cit;
+	// rit = crit;
+
+	// crit = it;
+	// crit = rit;
+	// crit = cit;
+	// crit = it;
 }
 

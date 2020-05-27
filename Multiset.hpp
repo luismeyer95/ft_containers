@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/20 18:38:19 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 21:36:36 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 13:04:03 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ namespace ft {
 	class multiset
 	{
 		public:
+		
 			typedef T key_type;
 			typedef T value_type;
 			typedef Cmp key_compare;
@@ -47,6 +48,7 @@ namespace ft {
 					using base_avl_iterator<U, is_const>::get;
 					using base_avl_iterator<U, is_const>::get_next;
 					using base_avl_iterator<U, is_const>::get_prev;
+					using base_avl_iterator<U, is_const>::tree_ref;
 				public:
 					typedef U value_type;
 					typedef typename choose<is_const, const U&, U&>::type reference;
@@ -114,10 +116,10 @@ namespace ft {
 			const_reverse_iterator 						rend() const;
 			reverse_iterator							rend();
 
+			template <class I>
+			void										insert (I first, I last);
 			iterator									insert (const value_type& val);
 			iterator									insert (iterator position, const value_type& val);
-			template <class I>
-			void insert (I first, I last);
 
 			void										erase(iterator position);
 			size_type									erase(const key_type& k);
@@ -175,7 +177,6 @@ namespace ft {
 			void						right_rotate(Node* root, Node* node);
 			bool						is_balanced(Node* root);
 
-			
 			void						print();
 			void						print_root(const Node* root);
 			void						free_tree(Node*& root);
@@ -210,7 +211,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	multiset<T, Cmp, Alloc>& 	multiset<T, Cmp, Alloc>::operator=(const multiset<T, Cmp, Alloc>& target)
+	multiset<T, Cmp, Alloc>&
+	multiset<T, Cmp, Alloc>::operator=(const multiset<T, Cmp, Alloc>& target)
 	{
 		free_tree(tree);
 		m_size = 0;
@@ -234,7 +236,8 @@ namespace ft {
 
 	// BEGIN
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::const_iterator	multiset<T, Cmp, Alloc>::begin() const
+	typename multiset<T, Cmp, Alloc>::const_iterator
+	multiset<T, Cmp, Alloc>::begin() const
 	{
 		Node* it = tree;
 		while (it && it->left)
@@ -242,7 +245,8 @@ namespace ft {
 		return (const_iterator(it, &tree));
 	}
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::iterator	multiset<T, Cmp, Alloc>::begin()
+	typename multiset<T, Cmp, Alloc>::iterator
+	multiset<T, Cmp, Alloc>::begin()
 	{
 		Node* it = tree;
 		while (it && it->left)
@@ -252,49 +256,58 @@ namespace ft {
 
 	// END
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::const_iterator	multiset<T, Cmp, Alloc>::end() const
+	typename multiset<T, Cmp, Alloc>::const_iterator
+	multiset<T, Cmp, Alloc>::end() const
 	{
 		return (const_iterator(nullptr, &tree));
 	}
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::iterator	multiset<T, Cmp, Alloc>::end()
+	typename multiset<T, Cmp, Alloc>::iterator
+	multiset<T, Cmp, Alloc>::end()
 	{
 		return (iterator(nullptr, &tree));
 	}
 
 	// RBEGIN
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::const_reverse_iterator multiset<T, Cmp, Alloc>::rbegin() const
+	typename multiset<T, Cmp, Alloc>::const_reverse_iterator
+	multiset<T, Cmp, Alloc>::rbegin() const
 	{
 		return const_reverse_iterator(end());
 	}
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::reverse_iterator multiset<T, Cmp, Alloc>::rbegin()
+	typename multiset<T, Cmp, Alloc>::reverse_iterator
+	multiset<T, Cmp, Alloc>::rbegin()
 	{
 		return reverse_iterator(end());
 	}
 
 	// REND
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::const_reverse_iterator	multiset<T, Cmp, Alloc>::rend() const
+	typename multiset<T, Cmp, Alloc>::const_reverse_iterator
+	multiset<T, Cmp, Alloc>::rend() const
 	{
 		return const_reverse_iterator(begin());
 	}
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::reverse_iterator	multiset<T, Cmp, Alloc>::rend()
+	typename multiset<T, Cmp, Alloc>::reverse_iterator
+	multiset<T, Cmp, Alloc>::rend()
 	{
 		return reverse_iterator(begin());
 	}
 
 	// INSERT
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::iterator multiset<T, Cmp, Alloc>::insert(const typename multiset<T, Cmp, Alloc>::value_type& val)
+	typename multiset<T, Cmp, Alloc>::iterator
+	multiset<T, Cmp, Alloc>::insert(const typename multiset<T, Cmp, Alloc>::value_type& val)
 	{
 		return insert_node(tree, val).first;
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::iterator	multiset<T, Cmp, Alloc>::insert(typename multiset<T, Cmp, Alloc>::iterator position, const typename multiset<T, Cmp, Alloc>::value_type& val)
+	typename multiset<T, Cmp, Alloc>::iterator
+	multiset<T, Cmp, Alloc>::insert(typename multiset<T, Cmp, Alloc>::iterator position,
+									const typename multiset<T, Cmp, Alloc>::value_type& val)
 	{
 		Node* pos_ptr = const_cast<Node*>(bcast(position).ptr);
 		iterator nextpos(ft::fwd(position, 1));
@@ -327,7 +340,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::size_type		multiset<T, Cmp, Alloc>::erase(const key_type& k)
+	typename multiset<T, Cmp, Alloc>::size_type
+	multiset<T, Cmp, Alloc>::erase(const key_type& k)
 	{
 		size_type del = 0;
 		while (delete_node(k))
@@ -356,14 +370,16 @@ namespace ft {
 
 	// SIZE
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::size_type		multiset<T, Cmp, Alloc>::size() const
+	typename multiset<T, Cmp, Alloc>::size_type
+	multiset<T, Cmp, Alloc>::size() const
 	{
 		return (m_size);
 	}
 
 	// MAX SIZE
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::size_type		multiset<T, Cmp, Alloc>::max_size() const
+	typename multiset<T, Cmp, Alloc>::size_type
+	multiset<T, Cmp, Alloc>::max_size() const
 	{
 		return (std::numeric_limits<size_type>::max() / sizeof(Node));
 	}
@@ -386,21 +402,24 @@ namespace ft {
 
 	// KEY_COMP
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::key_compare	multiset<T, Cmp, Alloc>::key_comp() const
+	typename multiset<T, Cmp, Alloc>::key_compare
+	multiset<T, Cmp, Alloc>::key_comp() const
 	{
 		return (m_comp);
 	}
 
 	// VALUE_COMP
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::value_compare multiset<T, Cmp, Alloc>::value_comp() const
+	typename multiset<T, Cmp, Alloc>::value_compare
+	multiset<T, Cmp, Alloc>::value_comp() const
 	{
 		return (value_compare(m_comp));
 	}
 
 	// FIND
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::iterator multiset<T, Cmp, Alloc>::find(const key_type& k)
+	typename multiset<T, Cmp, Alloc>::iterator
+	multiset<T, Cmp, Alloc>::find(const key_type& k)
 	{
 		Node* node = find_node(tree, k);
 		
@@ -410,7 +429,8 @@ namespace ft {
 			return end();
 	}
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::const_iterator multiset<T, Cmp, Alloc>::find(const key_type& k) const
+	typename multiset<T, Cmp, Alloc>::const_iterator
+	multiset<T, Cmp, Alloc>::find(const key_type& k) const
 	{
 		Node* node = find_node(tree, k);
 		
@@ -422,7 +442,8 @@ namespace ft {
 
 	// COUNT
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::size_type multiset<T, Cmp, Alloc>::count(const key_type& k) const
+	typename multiset<T, Cmp, Alloc>::size_type
+	multiset<T, Cmp, Alloc>::count(const key_type& k) const
 	{
 		Node* node = find_node(tree, k);
 		if (!node)
@@ -439,7 +460,8 @@ namespace ft {
 
 	// LOWER BOUND
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::iterator multiset<T, Cmp, Alloc>::lower_bound (const key_type& k)
+	typename multiset<T, Cmp, Alloc>::iterator
+	multiset<T, Cmp, Alloc>::lower_bound (const key_type& k)
 	{
 		iterator beg = this->begin();
 		iterator end = this->end();
@@ -449,7 +471,8 @@ namespace ft {
 		return end;
 	}
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::const_iterator multiset<T, Cmp, Alloc>::lower_bound (const key_type& k) const
+	typename multiset<T, Cmp, Alloc>::const_iterator
+	multiset<T, Cmp, Alloc>::lower_bound (const key_type& k) const
 	{
 		const_iterator beg(this->begin());
 		const_iterator end(this->end());
@@ -461,7 +484,8 @@ namespace ft {
 
 	// UPPER BOUND
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::iterator multiset<T, Cmp, Alloc>::upper_bound(const key_type& k)
+	typename multiset<T, Cmp, Alloc>::iterator
+	multiset<T, Cmp, Alloc>::upper_bound(const key_type& k)
 	{
 		iterator beg = this->begin();
 		iterator end = this->end();
@@ -471,7 +495,8 @@ namespace ft {
 		return end;
 	}
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::const_iterator multiset<T, Cmp, Alloc>::upper_bound(const key_type& k) const
+	typename multiset<T, Cmp, Alloc>::const_iterator
+	multiset<T, Cmp, Alloc>::upper_bound(const key_type& k) const
 	{
 		const_iterator beg = this->begin();
 		const_iterator end = this->end();
@@ -523,7 +548,7 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	long						multiset<T, Cmp, Alloc>::get_bfactor(Node* node)
+	long					multiset<T, Cmp, Alloc>::get_bfactor(Node* node)
 	{
 		long height_right = node->right ? node->right->height : -1;
 		long height_left = node->left ? node->left->height : -1;
@@ -538,7 +563,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::Node*	multiset<T, Cmp, Alloc>::find_node(Node* root, const key_type& key) const
+	typename multiset<T, Cmp, Alloc>::Node*
+	multiset<T, Cmp, Alloc>::find_node(Node* root, const key_type& key) const
 	{
 		if (!root)
 			return nullptr;
@@ -555,7 +581,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	std::pair<typename multiset<T, Cmp, Alloc>::Node*, bool>	multiset<T, Cmp, Alloc>::recursive_insert(Node* root, key_type key)
+	std::pair<typename multiset<T, Cmp, Alloc>::Node*, bool>
+	multiset<T, Cmp, Alloc>::recursive_insert(Node* root, key_type key)
 	{
 		if (!root)
 		{
@@ -586,7 +613,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename std::pair<typename multiset<T, Cmp, Alloc>::iterator, bool> 	multiset<T, Cmp, Alloc>::insert_node(Node* root, key_type key)
+	typename std::pair<typename multiset<T, Cmp, Alloc>::iterator, bool>
+	multiset<T, Cmp, Alloc>::insert_node(Node* root, key_type key)
 	{
 		std::pair<Node*, bool> node_pair = recursive_insert(root, key);
 		if (!tree)
@@ -599,7 +627,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename multiset<T, Cmp, Alloc>::size_type	multiset<T, Cmp, Alloc>::delete_node(key_type key, Node* keynode)
+	typename multiset<T, Cmp, Alloc>::size_type
+	multiset<T, Cmp, Alloc>::delete_node(key_type key, Node* keynode)
 	{
 		Node* node;
 		if (keynode)

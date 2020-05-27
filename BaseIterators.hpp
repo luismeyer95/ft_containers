@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/26 19:40:04 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 21:08:58 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 12:00:15 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,44 +46,109 @@ namespace ft {
 			typedef std::random_access_iterator_tag iterator_category;
 			typedef typename remove_const<T>::type non_const_type;
 			typedef base_v_iterator<non_const_type, false> non_const_iterator;
+
+			T*			ptr;
+			T&	get() { return (ptr); }
 			
 			base_v_iterator() : ptr(nullptr) {}
 			base_v_iterator(pointer p) : ptr(p) {}
-			base_v_iterator(const non_const_iterator& target) { this->ptr = target.ptr; }
-			inline base_v_iterator&	operator=(const non_const_iterator& target)
-			{ this->ptr = target.ptr; return *this; }
+			base_v_iterator(const non_const_iterator& target) : ptr(target.ptr) {}
 			virtual ~base_v_iterator() {}
+
+			inline base_v_iterator&		operator=(const non_const_iterator& target) {
+				this->ptr = target.ptr;
+				return *this;
+			}
 			
-			inline	reference			operator*() { return *ptr; }
-			inline	reference			operator[](difference_type n) { return ptr[n]; }
-			inline	reference			operator[](difference_type n) const { return ptr[n]; }
-			inline	base_v_iterator		operator+(difference_type n) { return base_v_iterator(ptr + n); }
-			inline  base_v_iterator&	operator+=(difference_type n) { ptr += n; return *this; }
-			inline  base_v_iterator		operator-(difference_type n) { return base_v_iterator(ptr - n); }
+			inline  base_v_iterator&	operator++() {
+				ptr++;
+				return (*this);
+			}
+			
+			inline  base_v_iterator		operator++(int) {
+				base_v_iterator tmp(ptr);
+				operator++();
+				return (tmp);
+			}
+			
+			inline  base_v_iterator&	operator--() {
+				ptr--;
+				return (*this);
+			}
+			
+			inline  base_v_iterator		operator--(int) {
+				base_v_iterator tmp(ptr);
+				operator--();
+				return (tmp);
+			}
+			
+			inline	reference			operator*() {
+				return *ptr;
+			}
+
+			inline	reference			operator[](difference_type n) {
+				return ptr[n];
+			}
+			
+			inline	base_v_iterator		operator+(difference_type n) {
+				return base_v_iterator(ptr + n);
+			}
+			
+			inline  base_v_iterator&	operator+=(difference_type n) {
+				ptr += n;
+				return *this;
+			}
+			
+			inline  base_v_iterator		operator-(difference_type n) {
+				return base_v_iterator(ptr - n);
+			}
+			
 			inline  long long			operator-(const base_v_iterator& other) {
 				return ((long long)ptr - (long long)other.ptr) / (long long)sizeof(value_type);
 			}
-			inline  base_v_iterator&	operator-=(difference_type n) { ptr -= n; return *this; }
-			inline  base_v_iterator&	operator++() { ptr++; return (*this); }
-			inline  base_v_iterator		operator++(int) { base_v_iterator tmp(ptr); operator++(); return (tmp); }
-			inline  base_v_iterator&	operator--() { ptr--; return (*this); }
-			inline  base_v_iterator		operator--(int) { base_v_iterator tmp(ptr); operator--(); return (tmp); }
+
+			inline  base_v_iterator&	operator-=(difference_type n) {
+				ptr -= n;
+				return *this;
+			}
+			
 
 			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator==(base_v_iterator<Ta, A> a, base_v_iterator<Tb, B> b) { return (a.ptr == b.ptr); }
-			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator!=(base_v_iterator<Ta, A> a, base_v_iterator<Tb, B> b) { return (a.ptr != b.ptr); }
-			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator<(base_v_iterator<Ta, A> a, base_v_iterator<Tb, B> b) { return (a.ptr < b.ptr); }
-			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator<=(base_v_iterator<Ta, A> a, base_v_iterator<Tb, B> b) { return (a.ptr <= b.ptr); }
-			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator>(base_v_iterator<Ta, A> a, base_v_iterator<Tb, B> b) { return (a.ptr > b.ptr); }
-			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator>=(base_v_iterator<Ta, A> a, base_v_iterator<Tb, B> b) { return (a.ptr >= b.ptr); }
+			friend inline bool			operator==(	base_v_iterator<Ta, A> a,
+													base_v_iterator<Tb, B> b) {
+				return (a.ptr == b.ptr);
+			}
 			
-			T*			ptr;
-			T&	get() { return (ptr); }
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator!=(	base_v_iterator<Ta, A> a,
+													base_v_iterator<Tb, B> b) {
+				return (a.ptr != b.ptr);
+			}
+			
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator<(	base_v_iterator<Ta, A> a,
+													base_v_iterator<Tb, B> b) {
+				return (a.ptr < b.ptr);
+			}
+			
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator<=(	base_v_iterator<Ta, A> a,
+													base_v_iterator<Tb, B> b) {
+				return (a.ptr <= b.ptr);
+			}
+			
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator>(	base_v_iterator<Ta, A> a,
+													base_v_iterator<Tb, B> b) {
+				return (a.ptr > b.ptr);
+			}
+			
+			template <typename Ta, typename Tb, bool A, bool B>
+			friend inline bool			operator>=(	base_v_iterator<Ta, A> a,
+													base_v_iterator<Tb, B> b) {
+				return (a.ptr >= b.ptr);
+			}
+			
 	};
 
 
@@ -121,43 +186,62 @@ namespace ft {
 			base_lst_iterator() : ptr(nullptr) {}
 			base_lst_iterator(node_pointer p) : ptr(p) {}
 			base_lst_iterator(const non_const_iterator& target) : ptr(target.ptr) {}
-			base_lst_iterator&	operator=(const non_const_iterator& target)
-			{ ptr = target.ptr; return *this; }
 			virtual ~base_lst_iterator() {}
 			
-			reference			operator*() { if (ptr) return ptr->data; throw std::out_of_range(std::string("Error: dereferencing null pointer")); }
-			// base_lst_iterator	operator+(size_t n) { base_lst_iterator tmp(ptr); while (n--) tmp++; return (tmp); }
-			// base_lst_iterator	operator-(size_t n) { base_lst_iterator tmp(ptr); while (n--) tmp--; return (tmp); }
-			base_lst_iterator&	operator++()
-			{
+			base_lst_iterator&	operator=(const non_const_iterator& target) {
+				ptr = target.ptr; return *this;
+			}
+
+			reference			operator*() {
+				if (ptr)
+					return ptr->data;
+				throw std::out_of_range(std::string("Error: dereferencing null pointer"));
+			}
+			
+			base_lst_iterator&	operator++() {
 				if (ptr)
 					ptr = ptr->next;
 				return (*this);
 			}
-			base_lst_iterator	operator++(int) { base_lst_iterator tmp(ptr); operator++(); return (tmp); }
-			base_lst_iterator&	operator--()
-			{
+
+			base_lst_iterator	operator++(int) {
+				base_lst_iterator tmp(ptr);
+				operator++();
+				return (tmp);
+			}
+			
+			base_lst_iterator&	operator--() {
 				if (ptr)
 					ptr = ptr->prev;
 				return (*this);
 			}
-			base_lst_iterator	operator--(int) { base_lst_iterator tmp(ptr); operator--(); return (tmp); }
+
+			base_lst_iterator	operator--(int) {
+				base_lst_iterator tmp(ptr);
+				operator--();
+				return (tmp);
+			}
 			
 			template <typename Ta, typename Tb, bool A, bool B>
 			friend bool			operator==(	const base_lst_iterator<Ta, A>& a,
-											const base_lst_iterator<Tb, B>& b)
-			{ return (a.ptr == b.ptr); }
+											const base_lst_iterator<Tb, B>& b) {
+				return (a.ptr == b.ptr);
+			}
 
 			template <typename Ta, typename Tb, bool A, bool B>
 			friend bool			operator!=(	const base_lst_iterator<Ta, A>& a,
-											const base_lst_iterator<Tb, B>& b)
-			{ return (a.ptr != b.ptr); }
+											const base_lst_iterator<Tb, B>& b) {
+				return (a.ptr != b.ptr);
+			}
 			
-			bool				operator==(node_pointer b) { return (ptr == b); }
-			bool				operator!=(node_pointer b) { return (ptr != b); }
-	};
+			bool				operator==(node_pointer b) {
+				return (ptr == b);
+			}
 
-	
+			bool				operator!=(node_pointer b) {
+				return (ptr != b);
+			}
+	};
 
 	template <typename T>
 	struct map_node
@@ -196,15 +280,16 @@ namespace ft {
 				: ptr(p), tree_ref(tree_ref) {}
 			base_avl_iterator(const non_const_iterator& target)
 				: ptr(target.ptr), tree_ref(target.tree_ref) {}
-			base_avl_iterator&	operator=(const non_const_iterator& target)
-			{
+			virtual ~base_avl_iterator() {}
+
+			base_avl_iterator&	operator=(const non_const_iterator& target) {
 				ptr = target.ptr;
 				tree_ref = target.tree_ref;
 				return *this;
 			}
-			virtual ~base_avl_iterator() {}
 			
 			map_node<non_const_type>*		get() { return (ptr); }
+			
 			base_avl_iterator				get_next(map_node<non_const_type>* root)
 			{
 				if (root->right)
@@ -249,8 +334,8 @@ namespace ft {
 				return base_avl_iterator(root, tree_ref);
 			}
 			
-			bool							operator==(map_node<non_const_type>* b) { return (ptr == b); }
-			bool							operator!=(map_node<non_const_type>* b) { return (ptr != b); }
+			bool			operator==(map_node<non_const_type>* b) { return (ptr == b); }
+			bool			operator!=(map_node<non_const_type>* b) { return (ptr != b); }
 
 			pointer			operator->()
 			{
@@ -260,12 +345,6 @@ namespace ft {
 			}
 	
 			reference		operator*()
-			{
-				if (ptr)
-					return ptr->pair;
-				throw std::out_of_range(std::string("Error: dereferencing null pointer"));
-			}
-			reference		operator*() const
 			{
 				if (ptr)
 					return ptr->pair;
@@ -285,7 +364,8 @@ namespace ft {
 				return (*this);
 			}
 
-			base_avl_iterator	operator++(int) {
+			base_avl_iterator	operator++(int)
+			{
 				base_avl_iterator tmp(ptr, tree_ref);
 				operator++();
 				return (tmp);
@@ -304,21 +384,22 @@ namespace ft {
 				return (*this);
 			}
 			
-			base_avl_iterator	operator--(int) {
+			base_avl_iterator	operator--(int)
+			{
 				base_avl_iterator tmp(ptr, tree_ref);
 				operator--();
 				return (tmp);
 			}
 			
 			template <typename Ta, typename Tb, bool A, bool B>
-			friend bool		operator==(const base_avl_iterator<Ta, A>& a,
-										const base_avl_iterator<Tb, B>& b) {
+			friend bool			operator==(	const base_avl_iterator<Ta, A>& a,
+											const base_avl_iterator<Tb, B>& b) {
 				return (a.ptr == b.ptr);
 			}
 
 			template <typename Ta, typename Tb, bool A, bool B>
-			friend bool		operator!=(const base_avl_iterator<Ta, A>& a,
-										const base_avl_iterator<Tb, B>& b) {
+			friend bool			operator!=(	const base_avl_iterator<Ta, A>& a,
+											const base_avl_iterator<Tb, B>& b) {
 				return (a.ptr != b.ptr);
 			}
 			
@@ -361,21 +442,14 @@ namespace ft {
 			base_dq_iterator() : head(0), dq(nullptr) {}
 			base_dq_iterator(ssize_t head, const deque_node<non_const_type>* dq) : head(head), dq(dq) {}
 			base_dq_iterator(const non_const_iterator& target) : head(target.head), dq(target.dq) {}
+			~base_dq_iterator() {}
+			
 			inline base_dq_iterator&	operator=(const non_const_iterator& target) {
 				this->dq = target.dq;
 				this->head = target.head;
 				return *this;
 			}
-			~base_dq_iterator() {}
 			
-			inline	reference			operator*() { return dq->_pmap[head / dq->_chunksize][head % dq->_chunksize]; }
-			inline	reference			operator[](difference_type n) { return *(*this + n); }
-			inline	reference			operator[](difference_type n) const { *(*this + n); }
-			inline	base_dq_iterator	operator+(difference_type n) { base_dq_iterator tmp(*this); while (n--) ++tmp; return tmp; }
-			inline  base_dq_iterator&	operator+=(difference_type n) { *this = *this + n; return *this; }
-			inline  base_dq_iterator	operator-(difference_type n) { base_dq_iterator tmp(*this); while (n--) --tmp; return tmp; }
-			inline  base_dq_iterator&	operator-=(difference_type n) { *this = *this + n; return *this; }
-
 			inline  base_dq_iterator&	operator++() {
 				if (head == dq->_tail)
 					head = -1;
@@ -386,7 +460,11 @@ namespace ft {
 				return (*this);
 			}
 
-			inline  base_dq_iterator	operator++(int) { base_dq_iterator tmp(*this); operator++(); return (tmp); }
+			inline  base_dq_iterator	operator++(int) {
+				base_dq_iterator tmp(*this);
+				operator++();
+				return (tmp);
+			}
 
 			inline  base_dq_iterator&	operator--() {
 				if (head == dq->_head)
@@ -397,7 +475,42 @@ namespace ft {
 					head = circular_increment(head - 1, dq->_capacity);
 				return (*this);
 			}
-			inline  base_dq_iterator	operator--(int) { base_dq_iterator tmp(*this); operator--(); return (tmp); }
+			
+			inline  base_dq_iterator	operator--(int) {
+				base_dq_iterator tmp(*this);
+				operator--();
+				return (tmp);
+			}
+			
+			inline	reference			operator*() {
+				return dq->_pmap[head / dq->_chunksize][head % dq->_chunksize];
+			}
+
+			inline	reference			operator[](difference_type n) {
+				return *(*this + n);
+			}
+
+			inline	base_dq_iterator	operator+(difference_type n) {
+				base_dq_iterator tmp(*this);
+				while (n--) ++tmp;
+				return tmp;
+			}
+
+			inline  base_dq_iterator&	operator+=(difference_type n) {
+				*this = *this + n;
+				return *this;
+			}
+			
+			inline  base_dq_iterator	operator-(difference_type n) {
+				base_dq_iterator tmp(*this);
+				while (n--) --tmp;
+				return tmp;
+			}
+			
+			inline  base_dq_iterator&	operator-=(difference_type n) {
+				*this = *this - n;
+				return *this;
+			}
 
 			inline  long long			operator-(const base_dq_iterator& other) {
 				bool pos = *this > other;
@@ -453,7 +566,6 @@ namespace ft {
 
 	};
 
-	
 
 	template <class U>
 	class base_reverse_iterator
@@ -465,6 +577,7 @@ namespace ft {
 			typedef typename iterator_type::difference_type difference_type;
 			typedef typename iterator_type::pointer pointer;
 			typedef typename iterator_type::reference reference;
+			typedef typename iterator_type::non_const_type non_const_type;
 			typedef typename iterator_type::non_const_iterator non_const_iterator;
 
 			iterator_type	itbase;
@@ -475,36 +588,96 @@ namespace ft {
 			base_reverse_iterator(const base_reverse_iterator<non_const_iterator>& rev_it)
 				: itbase(rev_it.itbase) {}
 			virtual ~base_reverse_iterator() {}
-			base_reverse_iterator&	operator=(const base_reverse_iterator<non_const_iterator>& target)
-			{ itbase = target.itbase; return *this; }
+			base_reverse_iterator&	operator=(const base_reverse_iterator<non_const_iterator>& target) {
+				itbase = target.itbase;
+				return *this;
+			}
 
-			reference			operator*() const { return (*ft::fwd(itbase, -1)); }
-			pointer				operator->() { return ft::fwd(itbase, -1).operator->(); }
-			base_reverse_iterator&	operator++() { --itbase; return *this; }
+			reference				operator*() {
+				return (*ft::fwd(itbase, -1));
+			}
 
-			base_reverse_iterator	operator+(difference_type n) { base_reverse_iterator tmp(*this); while (n--) ++tmp; return tmp; }
-			base_reverse_iterator	operator-(difference_type n) { base_reverse_iterator tmp(*this); while (n--) --tmp; return tmp; }
+			pointer					operator->() {
+				return ft::fwd(itbase, -1).operator->();
+			}
+			
+			base_reverse_iterator&	operator++() {
+				--itbase;
+				return *this;
+			}
 
-			base_reverse_iterator	operator++(int) { base_reverse_iterator tmp(*this); --itbase; return (tmp); }
-			base_reverse_iterator&	operator--() { ++itbase; return *this; }
-			base_reverse_iterator	operator--(int) { base_reverse_iterator tmp(*this); ++itbase; return (tmp); }
-			iterator_type 		base() const { return itbase; }
-			reference 			operator[](difference_type n) const { return itbase[-n - 1]; }
+			base_reverse_iterator	operator++(int) {
+				base_reverse_iterator tmp(*this);
+				--itbase;
+				return (tmp);
+			}
+
+			base_reverse_iterator&	operator--() {
+				++itbase;
+				return *this;
+			}
+
+			base_reverse_iterator	operator--(int) {
+				base_reverse_iterator tmp(*this);
+				++itbase;
+				return (tmp);
+			}
+
+			base_reverse_iterator	operator+(difference_type n) {
+				base_reverse_iterator tmp(*this);
+				while (n--) ++tmp;
+				return tmp;
+			}
+			
+			base_reverse_iterator	operator-(difference_type n) {
+				base_reverse_iterator tmp(*this);
+				while (n--) --tmp;
+				return tmp;
+			}
+
+			iterator_type 			base() {
+				return itbase;
+			}
+
+			reference 				operator[](difference_type n) {
+				return itbase[-n - 1];
+			}
 
 			template <typename A, typename B>
-			friend bool		operator==(const base_reverse_iterator<A>& a,
-										const base_reverse_iterator<B>& b)
-			{ return a.itbase == b.itbase; }
+			friend bool		operator==(	const base_reverse_iterator<A>& a,
+										const base_reverse_iterator<B>& b) {
+				return a.itbase == b.itbase;
+			}
 
 			template <typename A, typename B>
-			friend bool		operator!=(const base_reverse_iterator<A>& a,
-										const base_reverse_iterator<B>& b)
-			{ return a.itbase != b.itbase; }
+			friend bool		operator!=(	const base_reverse_iterator<A>& a,
+										const base_reverse_iterator<B>& b) {
+				return a.itbase != b.itbase;
+			}
 
+			template <typename A, typename B>
+			friend bool		operator<(	const base_reverse_iterator<A>& a,
+										const base_reverse_iterator<B>& b) {
+				return a.itbase >= b.itbase;
+			}
 
-			bool				operator<(const base_reverse_iterator& b) { return itbase >= b.itbase; }
-			bool				operator<=(const base_reverse_iterator& b) { return itbase > b.itbase; }
-			bool				operator>(const base_reverse_iterator& b) { return itbase <= b.itbase; }
-			bool				operator>=(const base_reverse_iterator& b) { return itbase < b.itbase; }
+			template <typename A, typename B>
+			friend bool		operator<=(	const base_reverse_iterator<A>& a,
+										const base_reverse_iterator<B>& b) {
+				return a.itbase > b.itbase;
+			}
+
+			template <typename A, typename B>
+			friend bool		operator>(	const base_reverse_iterator<A>& a,
+										const base_reverse_iterator<B>& b) {
+				return a.itbase <= b.itbase;
+			}
+
+			template <typename A, typename B>
+			friend bool		operator>=(	const base_reverse_iterator<A>& a,
+										const base_reverse_iterator<B>& b) {
+				return a.itbase < b.itbase;
+			}
+
 	};
 }

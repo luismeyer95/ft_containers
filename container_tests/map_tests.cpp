@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/13 13:42:26 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 21:26:08 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 12:05:56 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,31 +255,5 @@ int main()
 	map_tester<ft::map<char, int, std::less<char>, ft::allocator<std::pair<const char, int> > > >();
 	
 	std::cout.rdbuf(coutbuf);
-
-	ft::map<int, char> bob;
-	ft::map<int, char>::iterator it = bob.begin();
-	ft::map<int, char>::const_iterator cit = bob.begin();
-	ft::map<int, char>::reverse_iterator rit = bob.rbegin();
-	ft::map<int, char>::const_reverse_iterator crit = bob.rbegin();
-
-	// it = it;
-	// it = cit;
-	// it = rit;
-	// it = crit;
-
-	// cit = cit;
-	// cit = it;
-	// cit = rit;
-	// cit = crit;
-
-	// rit = rit;
-	// rit = it;
-	// rit = cit;
-	// rit = crit;
-
-	// crit = it;
-	// crit = rit;
-	// crit = cit;
-	// crit = it;
 	
 }

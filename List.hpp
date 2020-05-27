@@ -6,13 +6,13 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 16:16:15 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 21:17:21 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 12:39:08 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "utils.hpp"
+#include "BaseIterators.hpp"
 
 namespace ft {
 
@@ -66,8 +66,10 @@ namespace ft {
 					typedef lst_iterator<non_const_type, false> non_const_iterator;
 					
 					lst_iterator() : base_lst_iterator<U, is_const>() {}
-					lst_iterator(const base_lst_iterator<non_const_type, false>& it) : base_lst_iterator<U, is_const>(it.ptr) {}
-					lst_iterator(const lst_iterator<non_const_type, false>& target) : base_lst_iterator<U, is_const>(target) {}
+					lst_iterator(const base_lst_iterator<non_const_type, false>& it)
+						: base_lst_iterator<U, is_const>(it.ptr) {}
+					lst_iterator(const lst_iterator<non_const_type, false>& target)
+						: base_lst_iterator<U, is_const>(target) {}
 					using base_lst_iterator<U, is_const>::operator=;
 					~lst_iterator() {}
 			};
@@ -179,8 +181,6 @@ namespace ft {
 			friend bool operator>=(const list<U, V>&, const list<U, V>&);
 	};
 
-	
-	
 
 	template<typename T, class Alloc>
 	void 			list<T, Alloc>::link(Node* n1, Node* n2) { n1->next = n2; n2->prev = n1; }

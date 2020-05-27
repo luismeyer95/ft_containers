@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/20 18:37:07 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 21:35:44 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 12:50:00 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,19 +56,7 @@ namespace ft {
 			};
 			
 		protected:
-			// struct Node
-			// {
-			// 	value_type		pair;
-			// 	Node*			left;
-			// 	Node*			right;
-			// 	Node*			parent;
-			// 	ssize_t			height;
-				
-			// 	Node(Key key, T val, ssize_t height = -1)
-			// 		: 	pair(value_type(key, val)), left(nullptr),
-			// 			right(nullptr), parent(nullptr), height(height) {}
-			// 	~Node() {}
-			// };
+			
 			typedef ft::map_node<value_type> Node;
 
 			typedef typename Alloc::template rebind<Node>::other node_alloc;
@@ -81,6 +69,7 @@ namespace ft {
 					using base_avl_iterator<U, is_const>::get;
 					using base_avl_iterator<U, is_const>::get_next;
 					using base_avl_iterator<U, is_const>::get_prev;
+					using base_avl_iterator<U, is_const>::tree_ref;
 				public:
 					typedef U value_type;
 					typedef typename choose<is_const, const U&, U&>::type reference;
@@ -150,10 +139,10 @@ namespace ft {
 			const_reverse_iterator 						rend() const;
 			reverse_iterator							rend();
 
+			template <class I>
+			void										insert (I first, I last);
 			iterator									insert(const value_type& val);
 			iterator									insert(iterator position, const value_type& val);
-			template <class I>
-			void insert (I first, I last);
 
 			void										erase(iterator position);
 			size_type									erase(const key_type& k);
@@ -247,7 +236,8 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	multimap<Key, T, Cmp, Alloc>& 	multimap<Key, T, Cmp, Alloc>::operator=(const multimap<Key, T, Cmp, Alloc>& target)
+	multimap<Key, T, Cmp, Alloc>&
+	multimap<Key, T, Cmp, Alloc>::operator=(const multimap<Key, T, Cmp, Alloc>& target)
 	{
 		free_tree(tree);
 		m_size = 0;
@@ -271,7 +261,8 @@ namespace ft {
 
 	// BEGIN
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::const_iterator	multimap<Key, T, Cmp, Alloc>::begin() const
+	typename multimap<Key, T, Cmp, Alloc>::const_iterator
+	multimap<Key, T, Cmp, Alloc>::begin() const
 	{
 		Node* it = tree;
 		while (it && it->left)
@@ -279,7 +270,8 @@ namespace ft {
 		return (const_iterator(it, &tree));
 	}
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::iterator	multimap<Key, T, Cmp, Alloc>::begin()
+	typename multimap<Key, T, Cmp, Alloc>::iterator
+	multimap<Key, T, Cmp, Alloc>::begin()
 	{
 		Node* it = tree;
 		while (it && it->left)
@@ -289,49 +281,58 @@ namespace ft {
 
 	// END
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::const_iterator	multimap<Key, T, Cmp, Alloc>::end() const
+	typename multimap<Key, T, Cmp, Alloc>::const_iterator
+	multimap<Key, T, Cmp, Alloc>::end() const
 	{
 		return (const_iterator(nullptr, &tree));
 	}
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::iterator	multimap<Key, T, Cmp, Alloc>::end()
+	typename multimap<Key, T, Cmp, Alloc>::iterator
+	multimap<Key, T, Cmp, Alloc>::end()
 	{
 		return (iterator(nullptr, &tree));
 	}
 
 	// RBEGIN
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::const_reverse_iterator multimap<Key, T, Cmp, Alloc>::rbegin() const
+	typename multimap<Key, T, Cmp, Alloc>::const_reverse_iterator
+	multimap<Key, T, Cmp, Alloc>::rbegin() const
 	{
 		return const_reverse_iterator(end());
 	}
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::reverse_iterator multimap<Key, T, Cmp, Alloc>::rbegin()
+	typename multimap<Key, T, Cmp, Alloc>::reverse_iterator
+	multimap<Key, T, Cmp, Alloc>::rbegin()
 	{
 		return reverse_iterator(end());
 	}
 
 	// REND
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::const_reverse_iterator	multimap<Key, T, Cmp, Alloc>::rend() const
+	typename multimap<Key, T, Cmp, Alloc>::const_reverse_iterator
+	multimap<Key, T, Cmp, Alloc>::rend() const
 	{
 		return const_reverse_iterator(begin());
 	}
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::reverse_iterator	multimap<Key, T, Cmp, Alloc>::rend()
+	typename multimap<Key, T, Cmp, Alloc>::reverse_iterator
+	multimap<Key, T, Cmp, Alloc>::rend()
 	{
 		return reverse_iterator(begin());
 	}
 
 	// INSERT
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::iterator multimap<Key, T, Cmp, Alloc>::insert(const typename multimap<Key, T, Cmp, Alloc>::value_type& val)
+	typename multimap<Key, T, Cmp, Alloc>::iterator
+	multimap<Key, T, Cmp, Alloc>::insert(const typename multimap<Key, T, Cmp, Alloc>::value_type& val)
 	{
 		return insert_node(tree, val.first, val.second, false).first;
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::iterator	multimap<Key, T, Cmp, Alloc>::insert(typename multimap<Key, T, Cmp, Alloc>::iterator position, const typename multimap<Key, T, Cmp, Alloc>::value_type& val)
+	typename multimap<Key, T, Cmp, Alloc>::iterator
+	multimap<Key, T, Cmp, Alloc>::insert(typename multimap<Key, T, Cmp, Alloc>::iterator position,
+											const typename multimap<Key, T, Cmp, Alloc>::value_type& val)
 	{
 		Node* pos_ptr = bcast(position).ptr;
 		iterator prevpos(ft::fwd(position, -1));
@@ -367,7 +368,8 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::size_type		multimap<Key, T, Cmp, Alloc>::erase(const key_type& k)
+	typename multimap<Key, T, Cmp, Alloc>::size_type
+	multimap<Key, T, Cmp, Alloc>::erase(const key_type& k)
 	{
 		size_type del = 0;
 		while (delete_node(k))
@@ -396,14 +398,16 @@ namespace ft {
 
 	// SIZE
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::size_type		multimap<Key, T, Cmp, Alloc>::size() const
+	typename multimap<Key, T, Cmp, Alloc>::size_type
+	multimap<Key, T, Cmp, Alloc>::size() const
 	{
 		return (m_size);
 	}
 
 	// MAX SIZE
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::size_type		multimap<Key, T, Cmp, Alloc>::max_size() const
+	typename multimap<Key, T, Cmp, Alloc>::size_type
+	multimap<Key, T, Cmp, Alloc>::max_size() const
 	{
 		return (std::numeric_limits<size_type>::max() / sizeof(Node));
 	}
@@ -426,21 +430,24 @@ namespace ft {
 
 	// KEY_COMP
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::key_compare	multimap<Key, T, Cmp, Alloc>::key_comp() const
+	typename multimap<Key, T, Cmp, Alloc>::key_compare
+	multimap<Key, T, Cmp, Alloc>::key_comp() const
 	{
 		return (m_comp);
 	}
 
 	// VALUE_COMP
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::value_compare multimap<Key, T, Cmp, Alloc>::value_comp() const
+	typename multimap<Key, T, Cmp, Alloc>::value_compare
+	multimap<Key, T, Cmp, Alloc>::value_comp() const
 	{
 		return (value_compare(m_comp));
 	}
 
 	// FIND
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::iterator multimap<Key, T, Cmp, Alloc>::find(const key_type& k)
+	typename multimap<Key, T, Cmp, Alloc>::iterator
+	multimap<Key, T, Cmp, Alloc>::find(const key_type& k)
 	{
 		Node* node = find_node(tree, k);
 		
@@ -450,7 +457,8 @@ namespace ft {
 			return end();
 	}
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::const_iterator multimap<Key, T, Cmp, Alloc>::find(const key_type& k) const
+	typename multimap<Key, T, Cmp, Alloc>::const_iterator
+	multimap<Key, T, Cmp, Alloc>::find(const key_type& k) const
 	{
 		Node* node = find_node(tree, k);
 		
@@ -462,7 +470,8 @@ namespace ft {
 
 	// COUNT
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::size_type multimap<Key, T, Cmp, Alloc>::count(const key_type& k) const
+	typename multimap<Key, T, Cmp, Alloc>::size_type
+	multimap<Key, T, Cmp, Alloc>::count(const key_type& k) const
 	{
 		Node* node = find_node(tree, k);
 		if (!node)
@@ -479,7 +488,8 @@ namespace ft {
 
 	// LOWER BOUND
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::iterator multimap<Key, T, Cmp, Alloc>::lower_bound (const key_type& k)
+	typename multimap<Key, T, Cmp, Alloc>::iterator
+	multimap<Key, T, Cmp, Alloc>::lower_bound (const key_type& k)
 	{
 		iterator beg = this->begin();
 		iterator end = this->end();
@@ -489,7 +499,8 @@ namespace ft {
 		return end;
 	}
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::const_iterator multimap<Key, T, Cmp, Alloc>::lower_bound (const key_type& k) const
+	typename multimap<Key, T, Cmp, Alloc>::const_iterator
+	multimap<Key, T, Cmp, Alloc>::lower_bound (const key_type& k) const
 	{
 		const_iterator beg(this->begin());
 		const_iterator end(this->end());
@@ -501,7 +512,8 @@ namespace ft {
 
 	// UPPER BOUND
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::iterator multimap<Key, T, Cmp, Alloc>::upper_bound(const key_type& k)
+	typename multimap<Key, T, Cmp, Alloc>::iterator
+	multimap<Key, T, Cmp, Alloc>::upper_bound(const key_type& k)
 	{
 		iterator beg = this->begin();
 		iterator end = this->end();
@@ -511,7 +523,8 @@ namespace ft {
 		return end;
 	}
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::const_iterator multimap<Key, T, Cmp, Alloc>::upper_bound(const key_type& k) const
+	typename multimap<Key, T, Cmp, Alloc>::const_iterator
+	multimap<Key, T, Cmp, Alloc>::upper_bound(const key_type& k) const
 	{
 		const_iterator beg = this->begin();
 		const_iterator end = this->end();
@@ -563,7 +576,7 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	long						multimap<Key, T, Cmp, Alloc>::get_bfactor(Node* node)
+	long					multimap<Key, T, Cmp, Alloc>::get_bfactor(Node* node)
 	{
 		long height_right = node->right ? node->right->height : -1;
 		long height_left = node->left ? node->left->height : -1;
@@ -578,7 +591,8 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::Node*	multimap<Key, T, Cmp, Alloc>::find_node(Node* root, const key_type& key) const
+	typename multimap<Key, T, Cmp, Alloc>::Node*
+	multimap<Key, T, Cmp, Alloc>::find_node(Node* root, const key_type& key) const
 	{
 		if (!root)
 			return nullptr;
@@ -594,7 +608,8 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	std::pair<typename multimap<Key, T, Cmp, Alloc>::Node*, bool>	multimap<Key, T, Cmp, Alloc>::recursive_insert(Node* root, Key key, T val, bool force)
+	std::pair<typename multimap<Key, T, Cmp, Alloc>::Node*, bool>
+	multimap<Key, T, Cmp, Alloc>::recursive_insert(Node* root, Key key, T val, bool force)
 	{
 		if (!root)
 		{
@@ -625,7 +640,8 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	typename std::pair<typename multimap<Key, T, Cmp, Alloc>::iterator, bool> 	multimap<Key, T, Cmp, Alloc>::insert_node(Node* root, Key key, T val, bool force)
+	typename std::pair<typename multimap<Key, T, Cmp, Alloc>::iterator, bool>
+	multimap<Key, T, Cmp, Alloc>::insert_node(Node* root, Key key, T val, bool force)
 	{
 		std::pair<Node*, bool> node_pair = recursive_insert(root, key, val, force);
 		if (!tree)
@@ -638,7 +654,8 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::iterator 	multimap<Key, T, Cmp, Alloc>::insert_next_to(Node* root, Node* next, Key key, T val)
+	typename multimap<Key, T, Cmp, Alloc>::iterator
+	multimap<Key, T, Cmp, Alloc>::insert_next_to(Node* root, Node* next, Key key, T val)
 	{
 		Node* node = node_alloc(m_alloc).allocate(1);
 		node_alloc(m_alloc).construct(node, Node(std::pair<const Key, T>(key, val)));
@@ -663,7 +680,8 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	typename multimap<Key, T, Cmp, Alloc>::size_type	multimap<Key, T, Cmp, Alloc>::delete_node(Key key, Node* keynode)
+	typename multimap<Key, T, Cmp, Alloc>::size_type
+	multimap<Key, T, Cmp, Alloc>::delete_node(Key key, Node* keynode)
 	{
 		Node* node;
 		if (keynode)
@@ -886,6 +904,7 @@ namespace ft {
 	}
 
 	template <class Key, class T, class Cmp, class Alloc>
-	const typename multimap<Key, T, Cmp, Alloc>::Node*	multimap<Key, T, Cmp, Alloc>::get() const { return (tree); }
+	const typename multimap<Key, T, Cmp, Alloc>::Node*
+	multimap<Key, T, Cmp, Alloc>::get() const { return (tree); }
 
 }

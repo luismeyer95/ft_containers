@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/19 16:31:10 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 21:36:11 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 12:58:51 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ namespace ft {
 	class set
 	{
 		public:
+		
 			typedef T key_type;
 			typedef T value_type;
 			typedef Cmp key_compare;
@@ -47,6 +48,7 @@ namespace ft {
 					using base_avl_iterator<U, is_const>::get;
 					using base_avl_iterator<U, is_const>::get_next;
 					using base_avl_iterator<U, is_const>::get_prev;
+					using base_avl_iterator<U, is_const>::tree_ref;
 				public:
 					typedef U value_type;
 					typedef typename choose<is_const, const U&, U&>::type reference;
@@ -101,8 +103,9 @@ namespace ft {
 			template <typename I>
 			set(I first, I last, const key_compare& comp = key_compare());
 			set(const set& other);
-			set<T, Cmp, Alloc>& 	operator=(const set<T, Cmp, Alloc>& target);
 			~set();
+			
+			set<T, Cmp, Alloc>& 						operator=(const set<T, Cmp, Alloc>& target);
 
 			const_iterator								begin() const;
 			iterator									begin();
@@ -116,10 +119,10 @@ namespace ft {
 			const_reverse_iterator 						rend() const;
 			reverse_iterator							rend();
 
+			template <class I>
+			void										insert (I first, I last);
 			std::pair<iterator,bool>					insert (const value_type& val);
 			iterator									insert (iterator position, const value_type& val);
-			template <class I>
-			void insert (I first, I last);
 
 			void										erase(iterator position);
 			size_type									erase(const key_type& k);
@@ -179,73 +182,6 @@ namespace ft {
 			void						print_root(const Node* root);
 			void						free_tree(Node*& root);
 	};
-	
-
-	// template <class T, class Cmp, class Alloc>
-	// template <bool is_const>
-	// class set<T, Cmp, Alloc>::avl_iterator
-	// {
-	// 	friend class set<T, Cmp, Alloc>;
-	// 	protected:
-	// 		typedef typename choose<is_const, const Node*, Node*>::type node_pointer;
-	// 		node_pointer					ptr;
-	// 		const set<T, Cmp, Alloc>*		set_ptr;
-	// 		key_compare						m_comp;
-	// 		node_pointer&					get() { return (ptr); }
-	// 		avl_iterator					get_next(node_pointer root);
-	// 		avl_iterator					get_prev(node_pointer root);
-			
-	// 		bool							operator==(node_pointer b) { return (ptr == b); }
-	// 		bool							operator!=(node_pointer b) { return (ptr != b); }
-			
-	// 	public:
-	// 		typedef T value_type;
-	// 		typedef typename choose<is_const, const value_type&, value_type&>::type reference;
-	// 		typedef typename choose<is_const, const value_type*, value_type*>::type pointer;
-	// 		typedef std::ptrdiff_t difference_type;
-	// 		typedef std::bidirectional_iterator_tag iterator_category;
-	// 		typedef avl_iterator<false> non_const_iterator;
-			
-	// 		avl_iterator() : ptr(nullptr), set_ptr(nullptr) {}
-	// 		avl_iterator(node_pointer p, const set<T, Cmp, Alloc>* set, const key_compare& comp = key_compare())
-	// 			: ptr(p), set_ptr(set), m_comp(comp) {}
-
-	// 		avl_iterator(const avl_iterator<false>& target) { *this = target; }
-	// 		avl_iterator&	operator=(const avl_iterator<false>& target);
-									
-	// 		~avl_iterator() {}
-
-	// 		pointer			operator->();
-	// 		reference		operator*();
-	// 		reference		operator*() const;
-
-	// 		avl_iterator&	operator++();
-	// 		avl_iterator	operator++(int) {
-	// 			avl_iterator tmp(ptr, set_ptr, m_comp);
-	// 			operator++();
-	// 			return (tmp);
-	// 		}
-
-	// 		avl_iterator&	operator--();
-	// 		avl_iterator	operator--(int) {
-	// 			avl_iterator tmp(ptr, set_ptr, m_comp);
-	// 			operator--();
-	// 			return (tmp);
-	// 		}
-			
-	// 		template <bool A, bool B>
-	// 		friend bool		operator==(const avl_iterator<A>& a,
-	// 									const avl_iterator<B>& b) {
-	// 			return (a.ptr == b.ptr);
-	// 		}
-
-	// 		template <bool A, bool B>
-	// 		friend bool		operator!=(const avl_iterator<A>& a,
-	// 									const avl_iterator<B>& b) {
-	// 			return (a.ptr != b.ptr);
-	// 		}
-			
-	// };
 
 
 
@@ -300,7 +236,8 @@ namespace ft {
 
 	// BEGIN
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::const_iterator	set<T, Cmp, Alloc>::begin() const
+	typename set<T, Cmp, Alloc>::const_iterator
+	set<T, Cmp, Alloc>::begin() const
 	{
 		Node* it = tree;
 		while (it && it->left)
@@ -308,7 +245,8 @@ namespace ft {
 		return (const_iterator(it, &tree));
 	}
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::iterator	set<T, Cmp, Alloc>::begin()
+	typename set<T, Cmp, Alloc>::iterator
+	set<T, Cmp, Alloc>::begin()
 	{
 		Node* it = tree;
 		while (it && it->left)
@@ -318,49 +256,58 @@ namespace ft {
 
 	// END
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::const_iterator	set<T, Cmp, Alloc>::end() const
+	typename set<T, Cmp, Alloc>::const_iterator
+	set<T, Cmp, Alloc>::end() const
 	{
 		return (const_iterator(nullptr, &tree));
 	}
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::iterator	set<T, Cmp, Alloc>::end()
+	typename set<T, Cmp, Alloc>::iterator
+	set<T, Cmp, Alloc>::end()
 	{
 		return (iterator(nullptr, &tree));
 	}
 
 	// RBEGIN
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::const_reverse_iterator set<T, Cmp, Alloc>::rbegin() const
+	typename set<T, Cmp, Alloc>::const_reverse_iterator
+	set<T, Cmp, Alloc>::rbegin() const
 	{
 		return const_reverse_iterator(end());
 	}
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::reverse_iterator set<T, Cmp, Alloc>::rbegin()
+	typename set<T, Cmp, Alloc>::reverse_iterator
+	set<T, Cmp, Alloc>::rbegin()
 	{
 		return reverse_iterator(end());
 	}
 
 	// REND
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::const_reverse_iterator	set<T, Cmp, Alloc>::rend() const
+	typename set<T, Cmp, Alloc>::const_reverse_iterator
+	set<T, Cmp, Alloc>::rend() const
 	{
 		return const_reverse_iterator(begin());
 	}
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::reverse_iterator	set<T, Cmp, Alloc>::rend()
+	typename set<T, Cmp, Alloc>::reverse_iterator
+	set<T, Cmp, Alloc>::rend()
 	{
 		return reverse_iterator(begin());
 	}
 
 	// INSERT
 	template <class T, class Cmp, class Alloc>
-	std::pair<typename set<T, Cmp, Alloc>::iterator, bool> set<T, Cmp, Alloc>::insert(const typename set<T, Cmp, Alloc>::value_type& val)
+	std::pair<typename set<T, Cmp, Alloc>::iterator, bool>
+	set<T, Cmp, Alloc>::insert(const typename set<T, Cmp, Alloc>::value_type& val)
 	{
 		return insert_node(tree, val);
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::iterator	set<T, Cmp, Alloc>::insert(typename set<T, Cmp, Alloc>::iterator position, const typename set<T, Cmp, Alloc>::value_type& val)
+	typename set<T, Cmp, Alloc>::iterator
+	set<T, Cmp, Alloc>::insert(typename set<T, Cmp, Alloc>::iterator position,
+								const typename set<T, Cmp, Alloc>::value_type& val)
 	{
 		Node* pos_ptr = const_cast<Node*>(bcast(position).ptr);
 		iterator nextpos(ft::fwd(position, 1));
@@ -394,7 +341,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::size_type		set<T, Cmp, Alloc>::erase(const key_type& k)
+	typename set<T, Cmp, Alloc>::size_type
+	set<T, Cmp, Alloc>::erase(const key_type& k)
 	{
 		return delete_node(k);
 	}
@@ -420,14 +368,16 @@ namespace ft {
 
 	// SIZE
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::size_type		set<T, Cmp, Alloc>::size() const
+	typename set<T, Cmp, Alloc>::size_type
+	set<T, Cmp, Alloc>::size() const
 	{
 		return (m_size);
 	}
 
 	// MAX SIZE
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::size_type		set<T, Cmp, Alloc>::max_size() const
+	typename set<T, Cmp, Alloc>::size_type
+	set<T, Cmp, Alloc>::max_size() const
 	{
 		return (std::numeric_limits<size_type>::max() / sizeof(Node));
 	}
@@ -450,21 +400,24 @@ namespace ft {
 
 	// KEY_COMP
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::key_compare	set<T, Cmp, Alloc>::key_comp() const
+	typename set<T, Cmp, Alloc>::key_compare
+	set<T, Cmp, Alloc>::key_comp() const
 	{
 		return (m_comp);
 	}
 
 	// VALUE_COMP
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::value_compare set<T, Cmp, Alloc>::value_comp() const
+	typename set<T, Cmp, Alloc>::value_compare
+	set<T, Cmp, Alloc>::value_comp() const
 	{
 		return (value_compare(m_comp));
 	}
 
 	// FIND
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::iterator set<T, Cmp, Alloc>::find(const key_type& k)
+	typename set<T, Cmp, Alloc>::iterator
+	set<T, Cmp, Alloc>::find(const key_type& k)
 	{
 		Node* node = find_node(tree, k);
 		
@@ -474,7 +427,8 @@ namespace ft {
 			return end();
 	}
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::const_iterator set<T, Cmp, Alloc>::find(const key_type& k) const
+	typename set<T, Cmp, Alloc>::const_iterator
+	set<T, Cmp, Alloc>::find(const key_type& k) const
 	{
 		Node* node = find_node(tree, k);
 		
@@ -486,7 +440,8 @@ namespace ft {
 
 	// COUNT
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::size_type set<T, Cmp, Alloc>::count(const key_type& k) const
+	typename set<T, Cmp, Alloc>::size_type
+	set<T, Cmp, Alloc>::count(const key_type& k) const
 	{
 		Node* node = find_node(tree, k);
 		return (node ? 1 : 0);
@@ -494,7 +449,8 @@ namespace ft {
 
 	// LOWER BOUND
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::iterator set<T, Cmp, Alloc>::lower_bound (const key_type& k)
+	typename set<T, Cmp, Alloc>::iterator
+	set<T, Cmp, Alloc>::lower_bound (const key_type& k)
 	{
 		iterator beg = this->begin();
 		iterator end = this->end();
@@ -504,7 +460,8 @@ namespace ft {
 		return end;
 	}
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::const_iterator set<T, Cmp, Alloc>::lower_bound (const key_type& k) const
+	typename set<T, Cmp, Alloc>::const_iterator
+	set<T, Cmp, Alloc>::lower_bound (const key_type& k) const
 	{
 		const_iterator beg(this->begin());
 		const_iterator end(this->end());
@@ -516,7 +473,8 @@ namespace ft {
 
 	// UPPER BOUND
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::iterator set<T, Cmp, Alloc>::upper_bound(const key_type& k)
+	typename set<T, Cmp, Alloc>::iterator
+	set<T, Cmp, Alloc>::upper_bound(const key_type& k)
 	{
 		iterator beg = this->begin();
 		iterator end = this->end();
@@ -526,7 +484,8 @@ namespace ft {
 		return end;
 	}
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::const_iterator set<T, Cmp, Alloc>::upper_bound(const key_type& k) const
+	typename set<T, Cmp, Alloc>::const_iterator
+	set<T, Cmp, Alloc>::upper_bound(const key_type& k) const
 	{
 		const_iterator beg = this->begin();
 		const_iterator end = this->end();
@@ -584,7 +543,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::Node*	set<T, Cmp, Alloc>::find_node(Node* root, const key_type& key) const
+	typename set<T, Cmp, Alloc>::Node*
+	set<T, Cmp, Alloc>::find_node(Node* root, const key_type& key) const
 	{
 		if (!root)
 			return nullptr;
@@ -597,7 +557,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	std::pair<typename set<T, Cmp, Alloc>::Node*, bool>	set<T, Cmp, Alloc>::recursive_insert(Node* root, key_type key)
+	std::pair<typename set<T, Cmp, Alloc>::Node*, bool>
+	set<T, Cmp, Alloc>::recursive_insert(Node* root, key_type key)
 	{
 		if (!root)
 		{
@@ -631,7 +592,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename std::pair<typename set<T, Cmp, Alloc>::iterator, bool> 	set<T, Cmp, Alloc>::insert_node(Node* root, key_type key)
+	typename std::pair<typename set<T, Cmp, Alloc>::iterator, bool>
+	set<T, Cmp, Alloc>::insert_node(Node* root, key_type key)
 	{
 		std::pair<Node*, bool> node_pair = recursive_insert(root, key);
 		if (!tree)
@@ -644,7 +606,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::size_type	set<T, Cmp, Alloc>::delete_node(key_type key)
+	typename set<T, Cmp, Alloc>::size_type
+	set<T, Cmp, Alloc>::delete_node(key_type key)
 	{
 		Node* node = find_node(tree, key);
 		if (!node)
@@ -670,7 +633,8 @@ namespace ft {
 	}
 
 	template <class T, class Cmp, class Alloc>
-	typename set<T, Cmp, Alloc>::Node*	set<T, Cmp, Alloc>::recursive_extract(Node* parent, Node* root, key_type key)
+	typename set<T, Cmp, Alloc>::Node*
+	set<T, Cmp, Alloc>::recursive_extract(Node* parent, Node* root, key_type key)
 	{
 		if (!root)
 			return (nullptr);

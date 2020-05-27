@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/22 09:06:03 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 21:03:52 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 12:23:18 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ namespace ft {
 			template<typename I>
 			deque(I first, I last, const allocator_type& alloc = allocator_type());
 			deque(const deque<T, Alloc>& target);
-			deque<T, Alloc>& 	operator=(const deque<T, Alloc>& target);
+			deque<T, Alloc>& 		operator=(const deque<T, Alloc>& target);
 			~deque();
 			
 			size_type				size() const;
@@ -685,10 +685,10 @@ namespace ft {
 	void	deque<T, Alloc>::expand(size_type nb_chunks)
 	{
 		pointer array = _alloc.allocate(dq._chunksize);
-		typename ft::vector<pointer>::iterator nchunk = dq._pmap.insert(dq._pmap.begin() + dq._tailchunk + 1, array);
+		dq._pmap.insert(dq._pmap.begin() + dq._tailchunk + 1, array);
 		for (size_type i = dq._tail % dq._chunksize + 1; i < dq._chunksize; ++i)
 		{
-			_alloc.construct(*nchunk + i, dq._pmap[dq._tailchunk][i]);
+			_alloc.construct(array + i, dq._pmap[dq._tailchunk][i]);
 			_alloc.destroy(dq._pmap[dq._tailchunk] + i);
 		}
 		for (size_type i = 0; i < nb_chunks - 1; ++i)
