@@ -12,18 +12,21 @@ class Foo
 		int*	arr;
 		int		n;
 	public:
+		Foo() : arr(nullptr), n(0) {}
 		Foo(int n) : n(n) { arr = new int[n]; }
 		Foo(const Foo& o) : n(o.n) { arr = new int[n]; }
 		Foo& operator=(const Foo& o)
 		{
-			delete[] arr;
+			if (arr)
+				delete[] arr;
 			n = o.n;
 			arr = new int[n];
 			return *this;
 		}
 		~Foo()
 		{
-			delete[] arr;
+			if (arr)
+				delete[] arr;
 			arr = nullptr;
 		}
 		friend std::ostream& operator<<(std::ostream& o, const Foo& foo)
@@ -43,32 +46,42 @@ void	ctnr_tester()
 	typedef typename C::const_reverse_iterator const_reverse_iterator;
 
 	C ct;
-	typedef std::pair<char, Foo> pair;
 
-	// ct['e'] = Foo(2);
-	PRINT(ct.insert(pair('a', Foo(4))));
-	PRINT(ct.insert(pair('y', Foo(5))));
-	PRINT(ct.insert(pair('c', Foo(6))));
-	PRINT(ct.insert(pair('c', Foo(9))));
-	PRINT(ct.insert(pair('c', Foo(10))));
-	PRINT(ct.insert(pair('b', Foo(7))));
-	PRINT(ct.insert(pair('z', Foo(8))));
+	iterator it = ct.begin();
+	const_iterator cit = ct.begin();
+	reverse_iterator rit = ct.rbegin();
+	const_reverse_iterator crit = ct.rbegin();
 
-	// PRINT(ct.erase(ct.begin(), ct.end()));
-	PRINT(ct.erase(ft::fwd(ct.end(), -4)));
+	PRINT(ct.push_back(1));
+	PRINT(ct.push_back(2));
+	PRINT(ct.push_back(3));
+	PRINT(ct.push_back(4));
+	PRINT(ct.push_back(5));
+	PRINT(ct.push_back(6));
+
+	PRINT(ct.erase(ft::fwd(ct.begin(), 2), ft::fwd(ct.end(), -2)));
+
+	int arr[] = {2, 7, 6, 13};
+
+
+	PRINT(ct.insert(++ct.begin(), arr, arr + 4));
+	// PRINT(ct.erase(ct.end()));
 }
 
 int main()
 {
 	std::cout << " ** real ** " << std::endl;
-	ctnr_tester< std::multimap<char, Foo, std::greater<char> > >();
+	ctnr_tester< std::vector<int> >();
 
 	std::cout << " ** mine ** " << std::endl;
-	ctnr_tester< ft::multimap<char, Foo, std::greater<char> > >();
+	ctnr_tester< ft::vector<int> >();
 
-	ft::vector<int> bob;
-	ft::vector<int>::reverse_iterator rit= bob.rbegin();
-	ft::vector<int>::const_reverse_iterator crit = bob.rend();
+
+	ft::set<char> ct;
+	ft::set<char>::iterator it = ct.begin();
+	ft::set<char>::const_iterator cit = ct.begin();
+	ft::set<char>::reverse_iterator rit = ct.rbegin();
+	ft::set<char>::const_reverse_iterator crit = ct.rbegin();
 
 	// it = it;
 	// it = cit;

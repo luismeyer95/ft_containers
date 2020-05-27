@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/03/04 16:16:15 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/27 12:39:08 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 17:09:51 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,7 +207,7 @@ namespace ft {
 	typename list<T, Alloc>::Node*	list<T, Alloc>::create_node(const T& val)
 	{
 		Node *e = node_alloc(_alloc).allocate(1);
-		node_alloc(_alloc).construct(e, Node());
+		node_alloc(_alloc).construct(e, Node(val));
 		e->data = val;
 		return e;
 	}
@@ -465,6 +465,8 @@ namespace ft {
 	template<typename T, class Alloc>
 	typename list<T, Alloc>::iterator	list<T, Alloc>::erase(iterator position)
 	{
+		if (position == end())
+			throw std::invalid_argument("Error: trying to delete past the end element of list");
 		iterator next(fwd(position, 1));
 		delete_node(bcast(position).ptr);
 		_size--;
@@ -478,6 +480,8 @@ namespace ft {
 		iterator it = first;
 		while (it != last)
 		{
+			if (it == end())
+				throw std::invalid_argument("Error: trying to delete past the end element of list");
 			next = fwd(it, 1);
 			delete_node(bcast(it).ptr);
 			it = next;

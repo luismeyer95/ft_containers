@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/26 19:40:04 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/27 12:00:15 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 16:59:12 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,7 @@ namespace ft {
 		lst_node* next;
 		lst_node* prev;
 		T data;
+		lst_node(T val) : data(val) {}
 	};
 
 	template <typename T>

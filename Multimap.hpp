@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/20 18:37:07 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/27 12:50:00 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 15:16:22 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ namespace ft {
 					avl_iterator(Node* ptr, Node* const* tree)
 						: base_avl_iterator<U, is_const>(ptr, tree) {}
 					avl_iterator(const base_avl_iterator<non_const_type, false>& it)
-						: base_avl_iterator<U, is_const>(it.ptr) {}
+						: base_avl_iterator<U, is_const>(it.ptr, it.tree_ref) {}
 					avl_iterator(const non_const_iterator& target)
 						: base_avl_iterator<U, is_const>(target) {}
 					using base_avl_iterator<U, is_const>::operator=;
