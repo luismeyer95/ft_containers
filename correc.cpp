@@ -47,25 +47,26 @@ void	ctnr_tester()
 
 	C ct;
 
-	iterator it = ct.begin();
-	const_iterator cit = ct.begin();
-	reverse_iterator rit = ct.rbegin();
-	const_reverse_iterator crit = ct.rbegin();
 
-	PRINT(ct.push_back(1));
-	PRINT(ct.push_back(2));
-	PRINT(ct.push_back(3));
-	PRINT(ct.push_back(4));
-	PRINT(ct.push_back(5));
-	PRINT(ct.push_back(6));
+	ct.push_back(1);
+	ct.push_back(2);
+	ct.push_back(3);
+	ct.push_back(4);
+	ct.push_back(5);
+	ct.push_back(6);
 
-	PRINT(ct.erase(ft::fwd(ct.begin(), 2), ft::fwd(ct.end(), -2)));
+	const_iterator ita = ct.begin() + 2;
+	iterator itb = ct.begin() + 6;
 
-	int arr[] = {2, 7, 6, 13};
+	const_reverse_iterator rita(ita);
+	reverse_iterator ritb(itb);
 
+	cout << ita - itb << endl;
+	cout << itb - ita << endl;
+	cout << rita - ritb << endl;
+	cout << ritb - rita << endl;
 
-	PRINT(ct.insert(++ct.begin(), arr, arr + 4));
-	// PRINT(ct.erase(ct.end()));
+	cout << rita[1] << endl;
 }
 
 int main()
@@ -77,11 +78,11 @@ int main()
 	ctnr_tester< ft::vector<int> >();
 
 
-	ft::set<char> ct;
-	ft::set<char>::iterator it = ct.begin();
-	ft::set<char>::const_iterator cit = ct.begin();
-	ft::set<char>::reverse_iterator rit = ct.rbegin();
-	ft::set<char>::const_reverse_iterator crit = ct.rbegin();
+	// ft::set<char> ct;
+	// ft::set<char>::iterator it = ct.begin();
+	// ft::set<char>::const_iterator cit = ct.begin();
+	// ft::set<char>::reverse_iterator rit = ct.rbegin();
+	// ft::set<char>::const_reverse_iterator crit = ct.rbegin();
 
 	// it = it;
 	// it = cit;

@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/26 19:40:04 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/27 16:59:12 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/27 23:32:25 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,9 @@ namespace ft {
 			typedef std::ptrdiff_t difference_type;
 			typedef std::random_access_iterator_tag iterator_category;
 			typedef typename remove_const<T>::type non_const_type;
+			typedef typename add_const<T>::type const_type;
 			typedef base_v_iterator<non_const_type, false> non_const_iterator;
+			typedef base_v_iterator<const_type, true> const_iterator;
 
 			T*			ptr;
 			T&	get() { return (ptr); }
@@ -103,7 +105,11 @@ namespace ft {
 				return base_v_iterator(ptr - n);
 			}
 			
-			inline  long long			operator-(const base_v_iterator& other) {
+			inline  long long			operator-(const non_const_iterator& other) {
+				return ((long long)ptr - (long long)other.ptr) / (long long)sizeof(value_type);
+			}
+
+			inline  long long			operator-(const const_iterator& other) {
 				return ((long long)ptr - (long long)other.ptr) / (long long)sizeof(value_type);
 			}
 
@@ -435,7 +441,9 @@ namespace ft {
 			typedef size_t size_type;
 			typedef std::random_access_iterator_tag iterator_category;
 			typedef typename remove_const<T>::type non_const_type;
+			typedef typename add_const<T>::type const_type;
 			typedef base_dq_iterator<non_const_type, false> non_const_iterator;
+			typedef base_dq_iterator<const_type, true> const_iterator;
 
 			ssize_t								head;
 			const deque_node<non_const_type>*	dq;
@@ -513,10 +521,14 @@ namespace ft {
 				return *this;
 			}
 
-			inline  long long			operator-(const base_dq_iterator& other) {
+			inline  long long			operator-(const non_const_iterator& other) {
+				return *this - const_iterator(other);
+			}
+
+			inline  long long			operator-(const const_iterator& other) {
 				bool pos = *this > other;
-				base_dq_iterator first(!pos ? *this : other);
-				base_dq_iterator target(!pos ? other : *this);
+				const_iterator first(!pos ? *this : other);
+				const_iterator target(!pos ? other : *this);
 				long long count = 0;
 				long long sign = pos ? 1 : -1;
 				while (true)
@@ -531,16 +543,18 @@ namespace ft {
 			}
 
 			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator==(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
-			{ return (a.dq && a.dq == b.dq && a.head == b.head); }
+			friend inline bool			operator==(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b) {
+				return (a.head == b.head);
+			}
 
 			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator!=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
-			{ return (a.dq && a.dq == b.dq && a.head != b.head); }
+			friend inline bool			operator!=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b) {
+				return (a.head != b.head);
+			}
 			
 			template <typename Ta, typename Tb, bool A, bool B>
 			friend inline bool			operator<(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b) {
-				if (!a.dq || a.dq != b.dq || a.head == -1)
+				if (a.head == -1)
 					return false;
 				if (b.head == -1)
 					return true;
@@ -554,16 +568,19 @@ namespace ft {
 			}
 
 			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator<=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
-			{ return (a.dq && a.dq == b.dq && !(a > b)); }
+			friend inline bool			operator<=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b) {
+				return !(a > b);
+			}
 
 			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator>(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
-			{ return (a.dq && a.dq == b.dq && !(a < b) && a != b); }
+			friend inline bool			operator>(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b) {
+				return !(a < b) && a != b;
+			}
 			
 			template <typename Ta, typename Tb, bool A, bool B>
-			friend inline bool			operator>=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b)
-			{ return (a.dq && a.dq == b.dq && !(a < b)); }
+			friend inline bool			operator>=(base_dq_iterator<Ta, A> a, base_dq_iterator<Tb, B> b) {
+				return !(a < b);
+			}
 
 	};
 
@@ -634,6 +651,11 @@ namespace ft {
 				base_reverse_iterator tmp(*this);
 				while (n--) --tmp;
 				return tmp;
+			}
+
+			template <typename A>
+			long long				operator-(const base_reverse_iterator<A>& other) {
+				return -(itbase - other.itbase);
 			}
 
 			iterator_type 			base() {
