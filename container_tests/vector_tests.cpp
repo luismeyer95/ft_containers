@@ -6,7 +6,7 @@
 /*   By: lumeyer <lumeyer@student.le-101.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/27 13:42:13 by lumeyer           #+#    #+#             */
-/*   Updated: 2020/05/26 21:27:45 by lumeyer          ###   ########lyon.fr   */
+/*   Updated: 2020/05/28 09:32:11 by lumeyer          ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,9 +201,5 @@ int main()
 	comp_ops<ft::vector<std::string, ft::allocator<std::string> > >();
 
 	std::cout.rdbuf(coutbuf);
-
-	ft::vector<int> oi;
-	ft::vector<int>::iterator it = oi.begin();
-	ft::vector<int>::iterator itb = oi.begin();
 
 }

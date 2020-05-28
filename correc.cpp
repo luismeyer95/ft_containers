@@ -46,27 +46,7 @@ void	ctnr_tester()
 	typedef typename C::const_reverse_iterator const_reverse_iterator;
 
 	C ct;
-
-
-	ct.push_back(1);
-	ct.push_back(2);
-	ct.push_back(3);
-	ct.push_back(4);
-	ct.push_back(5);
-	ct.push_back(6);
-
-	const_iterator ita = ct.begin() + 2;
-	iterator itb = ct.begin() + 6;
-
-	const_reverse_iterator rita(ita);
-	reverse_iterator ritb(itb);
-
-	cout << ita - itb << endl;
-	cout << itb - ita << endl;
-	cout << rita - ritb << endl;
-	cout << ritb - rita << endl;
-
-	cout << rita[1] << endl;
+	
 }
 
 int main()
