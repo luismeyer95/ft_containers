@@ -6,6 +6,7 @@ The goal of this project is to learn about data structures by reimplementing som
 
 - Vector
 - Stack
+- Queue
 - List
 - Deque
 - Map
